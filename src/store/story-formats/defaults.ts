@@ -1,5 +1,10 @@
 export const builtins = () => [
 	{
+		name : 'Mundane',
+		url: 'story-formats/mundane/format.js',
+		version: '0.0.1'
+	},
+	{
 		name: 'Chapbook',
 		url: 'story-formats/chapbook-1.2.1/format.js',
 		version: '1.2.1'

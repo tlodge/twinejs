@@ -10,6 +10,8 @@ import {
 import {CheckboxButton} from '../../components/control/checkbox-button';
 import {MenuButton} from '../../components/control/menu-button';
 import {AddTagButton, TagButton} from '../../components/tag';
+
+
 import {
 	formatWithNameAndVersion,
 	useStoryFormatsContext
@@ -29,6 +31,7 @@ import {Color} from '../../util/color';
 import {PassageText} from './passage-text';
 import {RenamePassageButton} from '../../components/passage/rename-passage-button';
 import './passage-edit.css';
+import { AddOnStartButton } from '../../components/onstart';
 
 export interface PassageEditDialogProps
 	extends Omit<DialogCardProps, 'headerLabel'> {
@@ -57,6 +60,13 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 		[dispatch, passage, story]
 	);
 
+	const handleAddStart = React.useCallback(
+		(text: string, color?:Color)=>{
+			console.log("passage is", passage);
+			dispatch(updatePassage(story, passage, {text:`${text}\n${passage.text}`}));
+		},
+		[dispatch, passage, story]
+	);
 	// TODO: make tag changes undoable
 
 	function handleAddTag(name: string, color?: Color) {
@@ -117,6 +127,11 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 					assignedTags={passage.tags}
 					existingTags={storyPassageTags(story)}
 					onAdd={handleAddTag}
+				/>
+				<AddOnStartButton
+					assignedTags={passage.tags}
+					existingTags={storyPassageTags(story)}
+					onAdd={handleAddStart}
 				/>
 				<MenuButton
 					icon={<IconResize />}

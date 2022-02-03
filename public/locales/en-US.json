@@ -43,6 +43,7 @@
 		"story": "Story",
 		"storyFormat": "Story Format",
 		"tag": "Tag",
+		"onstart": "Start",
 		"test": "Test",
 		"twine": "Twine",
 		"undo": "Undo",
@@ -50,6 +51,9 @@
 		"view": "View"
 	},
 	"components": {
+		"onStartButton":{
+			"selectType": "Type"
+		},
 		"addTagButton": {
 			"alreadyAdded": "This tag name has already been added.",
 			"addLabel": "Add Tag",
