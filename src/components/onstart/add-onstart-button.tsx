@@ -12,7 +12,7 @@ import {isValidTagName} from '../../util/tag';
 import { AddActions } from './add-actions';
 import { AddSpeech } from './add-speech';
 import './add-onstart-button.css';
-
+import { Speech } from './add-speech';
 export interface AddTagButtonProps {
 	/**
 	 * Tags that have been assigned to this object.
@@ -38,7 +38,9 @@ export interface AddTagButtonProps {
 	 * Called when the user chooses to add a tag. If they are adding a
 	 * pre-existing tag, it will only send a name.
 	 */
-	onAdd: (name: string, color?: Color) => void;
+	onAdd: (lines:Speech[]) => void;
+
+    lines: Speech[]
 }
 
 export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
@@ -47,14 +49,15 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
 	const [newColor, setNewColor] = React.useState<Color>('none');
 	const [newName, setNewName] = React.useState('');
     const [startType, setStartType] = React.useState('');
+    const [lines, setLines] = React.useState<Array<Speech>>(props.lines);
 
 	const [open, setOpen] = React.useState(false);
 	const {t} = useTranslation();
 
 	let validationMessage: string | undefined = undefined;
-	let canAdd = isValidTagName(newName);
+	let canAdd = lines.length > 0;//isValidTagName(newName);
 
-	if (!canAdd && newName !== '') {
+	/*if (!canAdd && newName !== '') {
 		validationMessage = t('components.addTagButton.invalidName');
 	}
 
@@ -64,15 +67,10 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
 		if (!canAdd) {
 			validationMessage = t('components.addTagButton.alreadyAdded');
 		}
-	}
+	}*/
 
 	function handleAdd() {
-		if (creatingStart) {
-			onAdd(newName, newColor);
-		} else {
-			onAdd(newName);
-		}
-
+		onAdd(lines);
 		setOpen(false);
 	}
 
@@ -82,6 +80,7 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
         setCreatingStart(true);
 	}
 
+   
 	return (
 		<span className="add-tag-button">
 			<CardButton
@@ -91,7 +90,7 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
 				onChangeOpen={setOpen}
 				open={open}
 			>
-				<CardContent>
+				<CardContent style={{width:400}}>
 					<TextSelect
 						onChange={handleTypeChange}
 						options={[
@@ -106,7 +105,7 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
                         <AddActions onAdd={()=>{}}/>
                     )}
                     {startType === "speech" && (
-                        <AddSpeech onAdd={()=>{}}/>
+                        <AddSpeech lines={lines} onAdd={(lines)=>{setLines(lines)}}/>
                     )}
 					{creatingStart && !!validationMessage && <p>{validationMessage}</p>}
 				</CardContent>

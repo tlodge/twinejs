@@ -9,6 +9,7 @@ export interface TextInputProps {
 	placeholder?: string;
 	type?: 'search' | 'text';
 	value: string;
+	style?: object;
 }
 
 export const TextInput: React.FC<TextInputProps> = props => {
@@ -21,13 +22,14 @@ export const TextInput: React.FC<TextInputProps> = props => {
 	return (
 		<span className={className}>
 			<label>
-				<span className="text-input-label">{props.children}</span>
+				{props.children && <span className="text-input-label">{props.children}</span>}
 				<input
 					onChange={props.onChange}
 					onInput={props.onInput}
 					placeholder={props.placeholder}
 					type={props.type ?? 'text'}
 					value={props.value}
+					style={props.style || {}}
 				/>
 			</label>
 		</span>

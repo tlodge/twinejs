@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useTranslation} from 'react-i18next';
+import {composeInitialProps, useTranslation} from 'react-i18next';
 import {IconResize} from '@tabler/icons';
 import {UndoRedoButtons} from '../../components/codemirror/undo-redo-buttons';
 import {ButtonBar} from '../../components/container/button-bar';
@@ -32,12 +32,17 @@ import {PassageText} from './passage-text';
 import {RenamePassageButton} from '../../components/passage/rename-passage-button';
 import './passage-edit.css';
 import { AddOnStartButton } from '../../components/onstart';
+import { AddSpeech, Speech } from '../../components/onstart/add-speech';
+
+import {convertToObject, convertToString} from '../../util/caravan';
+
 
 export interface PassageEditDialogProps
 	extends Omit<DialogCardProps, 'headerLabel'> {
 	passageId: string;
 	storyId: string;
 }
+
 
 export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props => {
 	const {passageId, storyId, ...other} = props;
@@ -60,13 +65,18 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 		[dispatch, passage, story]
 	);
 
-	const handleAddStart = React.useCallback(
-		(text: string, color?:Color)=>{
-			console.log("passage is", passage);
-			dispatch(updatePassage(story, passage, {text:`${text}\n${passage.text}`}));
-		},
-		[dispatch, passage, story]
-	);
+
+	const handleAddStart = React.useCallback((lines : Speech[])=>{
+		//get the current text and turn into a node object
+		const passageobj = convertToObject(passage.text);
+
+		//set the new text using a passage object modified with speech lines
+		const passagetext = convertToString({...passageobj, onstart:{...passageobj.onstart, speech:lines}});
+		
+		//update the passage object
+		dispatch(updatePassage(story, passage, {text: passagetext}));
+
+	},[dispatch, passage, story]);
 	// TODO: make tag changes undoable
 
 	function handleAddTag(name: string, color?: Color) {
@@ -131,6 +141,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 				<AddOnStartButton
 					assignedTags={passage.tags}
 					existingTags={storyPassageTags(story)}
+					lines={(convertToObject(passage.text||"").onstart || {}).speech || []}
 					onAdd={handleAddStart}
 				/>
 				<MenuButton

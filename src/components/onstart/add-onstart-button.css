@@ -10,3 +10,35 @@
 	display: inline-block;
 	width: 6em;
 }
+
+.speechcontainer{
+	display: flex;
+	flex-direction: column;
+}
+
+.speechformitem{
+	margin:5px;
+}
+
+.paramline{
+	display: flex;
+	flex-direction: row;
+}
+
+.lines{
+	display: flex;
+	flex-direction: row;
+}
+
+.lines >div{
+	padding:5px;
+	width: 50px;
+}
+
+.lines .words{
+	width:238px;
+}
+
+.lines .rate{
+	width: 30px;
+}
