@@ -10,7 +10,7 @@ import {
 import {CheckboxButton} from '../../components/control/checkbox-button';
 import {MenuButton} from '../../components/control/menu-button';
 import {AddTagButton, TagButton} from '../../components/tag';
-
+import { AddRulesButton } from '../../components/rules/add-rules-button';
 
 import {
 	formatWithNameAndVersion,
@@ -133,18 +133,22 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 		>
 			<ButtonBar>
 				<UndoRedoButtons editor={cmEditor} watch={passage.text} />
-				<AddTagButton
+				{/*<AddTagButton
 					assignedTags={passage.tags}
 					existingTags={storyPassageTags(story)}
 					onAdd={handleAddTag}
-				/>
+				/>*/}
+
+				<AddRulesButton
+					rules={[]}
+					onAdd={()=>{}}
+				/>		
 				<AddOnStartButton
-					assignedTags={passage.tags}
-					existingTags={storyPassageTags(story)}
 					lines={(convertToObject(passage.text||"").onstart || {}).speech || []}
+					actions={[[]]}
 					onAdd={handleAddStart}
 				/>
-				<MenuButton
+				{/*<MenuButton
 					icon={<IconResize />}
 					items={[
 						{
@@ -173,7 +177,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 						}
 					]}
 					label={t('dialogs.passageEdit.size')}
-				/>
+				/>*/}
 				<RenamePassageButton
 					onRename={handleRename}
 					passage={passage}

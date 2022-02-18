@@ -1,29 +1,11 @@
 import { Speech } from "../components/onstart/add-speech";
-
+import { Action } from "../components/onstart/add-actions";
+import { Rule } from "../components/rules/add-rules";
+import { Method } from "../components/onstart/add-actions";
 const DEFAULTRATE 	= 180;
 const DEFAULTDELAY 	= 0;
 const DEFAULTVOICE = "Daniel";
 
-
-enum Method {
-    POST = 'POST',
-    GET = 'GET',
-    NONE = ''
-}
-
-export interface Action {
-    action: string | URL
-    delay?:Number
-    params?: object
-    method?: Method
-}
-
-export interface Rule {
-    operator: string
-    operand: string
-    actions: Action[][]
-    next: string
-}
 
 export interface Node{
     onstart : {
@@ -148,7 +130,7 @@ const parseRuleText = (text:string) : Rule =>{
         operator: operator.replace(/\s+/g,""),
         operand: operand.replace(/\s+/g,""),
         next: next.replace(/\s+/g,""),
-        actions : extractActions(actions.trim())
+        actions : extractActions((actions||"").trim())
     }
 }
 

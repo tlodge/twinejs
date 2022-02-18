@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {useTranslation} from 'react-i18next';
-import {colors, Color} from '../../util/color';
 import {IconPlus, IconX} from '@tabler/icons';
 import {ButtonBar} from '../container/button-bar';
 import {CardContent} from '../container/card';
@@ -9,13 +8,14 @@ import {IconButton} from '../control/icon-button';
 import {TextInput} from '../control/text-input';
 import {TextSelect} from '../control/text-select';
 import {isValidTagName} from '../../util/tag';
-import { AddActions } from './add-actions';
-import { AddSpeech } from './add-speech';
-import './add-onstart-button.css';
-import { Speech } from './add-speech';
-import {Action} from './add-actions';
+import { AddRules } from './add-rules';
+//import { AddSpeech } from './add-speech';
+import './add-rules-button.css';
+//import { Speech } from './add-speech';
+import {Action} from '../onstart/add-actions';
+import {Rule} from './add-rules';
 
-export interface AddTagButtonProps {
+export interface AddRuleButton {
 	
     
 	icon?: React.ReactNode;
@@ -27,23 +27,22 @@ export interface AddTagButtonProps {
 	 * Called when the user chooses to add a tag. If they are adding a
 	 * pre-existing tag, it will only send a name.
 	 */
-	onAdd: (lines:Speech[]) => void;
+	onAdd: (rules:Rule[]) => void;
 
-    lines: Speech[]
-    actions: Action[][]
+    rules: Rule[];
 }
 
-export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
+export const AddRulesButton: React.FC<AddRuleButton> = props => {
 	const {icon, label, onAdd} = props;
 	const [creatingStart, setCreatingStart] = React.useState(true);
     const [startType, setStartType] = React.useState('');
-    const [lines, setLines] = React.useState<Array<Speech>>(props.lines);
+    const [rules, setRules] = React.useState<Rule[]>(props.rules);
 
 	const [open, setOpen] = React.useState(false);
 	const {t} = useTranslation();
 
 	let validationMessage: string | undefined = undefined;
-	let canAdd = lines.length > 0;//isValidTagName(newName);
+	
 
 	/*if (!canAdd && newName !== '') {
 		validationMessage = t('components.addTagButton.invalidName');
@@ -58,7 +57,7 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
 	}*/
 
 	function handleAdd() {
-		onAdd(lines);
+		onAdd(rules);
 		setOpen(false);
 	}
 
@@ -74,32 +73,19 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
 			<CardButton
 				disabled={false}
 				icon={icon ?? <IconPlus />}
-				label={label ?? t('common.onstart')}
+				label={label ?? t('common.rules')}
 				onChangeOpen={setOpen}
 				open={open}
 			>
 				<CardContent style={{width:400}}>
-					<TextSelect
-						onChange={handleTypeChange}
-						options={[
-							{disabled:false, label:"action", value:"action"},
-                            {disabled:false, label:"speech", value:"speech"}
-						]}
-						value={startType}
-					>
-						{t('components.onStartButton.selectType')}
-					</TextSelect>
-                    {startType === "action" && (
-                        <AddActions onAdd={()=>{}}/>
-                    )}
-                    {startType === "speech" && (
-                        <AddSpeech lines={lines} onAdd={(lines)=>{setLines(lines)}}/>
-                    )}
+					
+                    <AddRules onAdd={()=>{}}/>
+                    
 					{creatingStart && !!validationMessage && <p>{validationMessage}</p>}
 				</CardContent>
 				<ButtonBar>
 					<IconButton
-						disabled={!canAdd}
+						disabled={true}
 						icon={<IconPlus />}
 						label={t('common.add')}
 						onClick={handleAdd}

@@ -13,6 +13,22 @@ export interface AddActionProps {
 	onAdd: (name: string, color?: Color) => void;
 }
 
+export enum Method {
+    POST = 'POST',
+    GET = 'GET',
+    NONE = ''
+}
+
+export interface Action {
+    action: string | URL
+    delay?:Number
+    params?: object
+    method?: Method
+}
+
+
+
+
 export const AddActions: React.FC<AddActionProps> = props => {
 	const {onAdd} = props;
 	const [action, setAction] = React.useState('');
