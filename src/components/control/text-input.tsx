@@ -10,6 +10,7 @@ export interface TextInputProps {
 	type?: 'search' | 'text';
 	value: string;
 	style?: object;
+	helptext?:string;
 }
 
 export const TextInput: React.FC<TextInputProps> = props => {
@@ -20,6 +21,7 @@ export const TextInput: React.FC<TextInputProps> = props => {
 	);
 
 	return (
+		<>
 		<span className={className}>
 			<label>
 				{props.children && <span className="text-input-label">{props.children}</span>}
@@ -33,5 +35,7 @@ export const TextInput: React.FC<TextInputProps> = props => {
 				/>
 			</label>
 		</span>
+		{props.helptext && <div style={{fontSize:"0.8em", margin:"5px 0px 0px 100px"}}>{props.helptext||""}</div>}
+		</>
 	);
 };

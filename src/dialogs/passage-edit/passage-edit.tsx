@@ -33,6 +33,7 @@ import {RenamePassageButton} from '../../components/passage/rename-passage-butto
 import './passage-edit.css';
 import { AddOnStartButton } from '../../components/onstart';
 import { AddSpeech, Speech } from '../../components/onstart/add-speech';
+import { Rule } from '../../components/rules/add-rules';
 
 import {convertToObject, convertToString} from '../../util/caravan';
 
@@ -64,7 +65,6 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 		},
 		[dispatch, passage, story]
 	);
-
 
 	const handleAddStart = React.useCallback((lines : Speech[])=>{
 		//get the current text and turn into a node object
@@ -141,7 +141,20 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 
 				<AddRulesButton
 					rules={[]}
-					onAdd={()=>{}}
+					onAdd={(rules:Rule[])=>{
+					
+						const passageobj = convertToObject(passage.text);
+						const _updated = {
+							...passageobj,
+							rules : [...passageobj.rules, ...rules]
+						}
+						console.log("ok updates is", _updated);
+						const passagetext = convertToString(_updated);
+						console.log(passagetext);
+						//update the passage object
+						dispatch(updatePassage(story, passage, {text: passagetext}));
+
+					}}
 				/>		
 				<AddOnStartButton
 					lines={(convertToObject(passage.text||"").onstart || {}).speech || []}
@@ -224,6 +237,7 @@ export const PassageEditDialog: React.FC<PassageEditDialogProps> = props => {
 	try {
 		passageWithId(stories, props.storyId, props.passageId);
 	} catch (err) {
+		console.log("ERROR", err);
 		props.onClose();
 		return null;
 	}

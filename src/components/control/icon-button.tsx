@@ -12,6 +12,7 @@ export interface IconButtonProps {
 	onClick?: (e: React.MouseEvent) => void;
 	preventDefault?: boolean;
 	variant?: 'create' | 'danger' | 'primary' | 'secondary';
+	style?: object;
 }
 
 export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
@@ -23,7 +24,8 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
 			iconPosition = 'start',
 			onClick,
 			preventDefault,
-			variant = 'secondary'
+			variant = 'secondary',
+			style={}
 		} = props;
 
 		const className = classNames(
@@ -48,6 +50,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
 				className={className}
 				onClick={handleOnClick}
 				ref={ref}
+				style={style}
 			>
 				<span className="icon">{icon}</span>
 				{!iconOnly && props.label}

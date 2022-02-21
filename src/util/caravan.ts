@@ -63,7 +63,7 @@ const parseActionLine = (line:string) : Action=>{
         return {
             action: toks[0].startsWith("http") ? new URL(toks[0]):toks[0], 
             delay: toks.length > 1 ? Number(toks[1].trim()) : 0, 
-            params: toks.length > 2 ? extractParams(params) : {},
+            params: toks.length > 2 ? params : "",//extractParams(params) : {},
             method: toks.length > 3 ? toks[2] === "POST" ? Method.POST : Method.GET : Method.NONE 
         }
     }
@@ -178,6 +178,7 @@ export function convertToObject(text:string): Node{
 }
 
 const paramToTuple = (params:any) : string=>{
+    return params;
     if (Object.keys(params).length <= 0)
         return "";
     return Object.keys(params).reduce((acc:string, key:string)=>{

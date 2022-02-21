@@ -22,7 +22,7 @@ export enum Method {
 export interface Action {
     action: string | URL
     delay?:Number
-    params?: object
+    params?: string
     method?: Method
 }
 

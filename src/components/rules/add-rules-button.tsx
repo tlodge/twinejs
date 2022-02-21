@@ -57,6 +57,7 @@ export const AddRulesButton: React.FC<AddRuleButton> = props => {
 	}*/
 
 	function handleAdd() {
+		console.log("OK IN HANDLE ADD!!");
 		onAdd(rules);
 		setOpen(false);
 	}
@@ -74,29 +75,22 @@ export const AddRulesButton: React.FC<AddRuleButton> = props => {
 				disabled={false}
 				icon={icon ?? <IconPlus />}
 				label={label ?? t('common.rules')}
-				onChangeOpen={setOpen}
+				onChangeOpen={()=>{
+					setOpen(true)
+				}}
 				open={open}
 			>
 				<CardContent style={{width:400}}>
 					
-                    <AddRules onAdd={()=>{}}/>
+                    <AddRules onCancel={()=>{setOpen(false)}} onAdd={(rules:Rule[])=>{
+						setOpen(false);
+						console.log('adding rules', rules);
+						onAdd(rules);
+					}}/>
                     
 					{creatingStart && !!validationMessage && <p>{validationMessage}</p>}
 				</CardContent>
-				<ButtonBar>
-					<IconButton
-						disabled={true}
-						icon={<IconPlus />}
-						label={t('common.add')}
-						onClick={handleAdd}
-						variant="create"
-					/>
-					<IconButton
-						icon={<IconX />}
-						label={t('common.cancel')}
-						onClick={() => setOpen(false)}
-					/>
-				</ButtonBar>
+				
 			</CardButton>
 		</span>
 	);
