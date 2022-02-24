@@ -140,7 +140,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 				/>*/}
 
 				<AddRulesButton
-					rules={[]}
+					rules={convertToObject(passage.text).rules}
 					onAdd={(rules:Rule[])=>{
 					
 						const passageobj = convertToObject(passage.text);
@@ -148,7 +148,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 							...passageobj,
 							rules : [...passageobj.rules, ...rules]
 						}
-						console.log("ok updates is", _updated);
+						
 						const passagetext = convertToString(_updated);
 						console.log(passagetext);
 						//update the passage object

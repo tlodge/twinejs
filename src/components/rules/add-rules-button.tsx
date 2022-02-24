@@ -37,7 +37,7 @@ export const AddRulesButton: React.FC<AddRuleButton> = props => {
 	const [creatingStart, setCreatingStart] = React.useState(true);
     const [startType, setStartType] = React.useState('');
     const [rules, setRules] = React.useState<Rule[]>(props.rules);
-
+	console.log("in add riles button with rules", rules);
 	const [open, setOpen] = React.useState(false);
 	const {t} = useTranslation();
 
@@ -80,11 +80,11 @@ export const AddRulesButton: React.FC<AddRuleButton> = props => {
 				}}
 				open={open}
 			>
-				<CardContent style={{width:400}}>
+				<CardContent style={{width:400, maxHeight:400, overflowY:"auto"}}>
 					
-                    <AddRules onCancel={()=>{setOpen(false)}} onAdd={(rules:Rule[])=>{
+                    <AddRules onCancel={()=>{setOpen(false)}} rules={props.rules}  onAdd={(rules:Rule[])=>{
 						setOpen(false);
-						console.log('adding rules', rules);
+						console.log("have rules as", rules);
 						onAdd(rules);
 					}}/>
                     

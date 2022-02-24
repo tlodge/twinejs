@@ -125,7 +125,6 @@ const parseRuleText = (text:string) : Rule =>{
     const rtoks = r.replace("[[","").replace("]]","").split("|");
     const [operator="", operand=""] = rtoks[0].trim().split(" ");
     const next = rtoks.length > 1 ? rtoks[1] : operand;
-
     return  {
         operator: operator.replace(/\s+/g,""),
         operand: operand.replace(/\s+/g,""),
