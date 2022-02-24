@@ -120,13 +120,14 @@ const extractActions = (text:string) : (Action)[][] =>{
     return actions;
 }
 
-const parseRuleText = (text:string) : Rule =>{
+const parseRuleText = (text:string, type:string) : Rule =>{
     const [r, actions] = text.split('[actions]');
     const rtoks = r.replace("[[","").replace("]]","").split("|");
-    const [operator="", operand=""] = rtoks[0].trim().split(" ");
+    const [operand=""] = rtoks[0].trim().split(" ");
     const next = rtoks.length > 1 ? rtoks[1] : operand;
     return  {
-        operator: operator.replace(/\s+/g,""),
+        type,
+        operator: 'equals', 
         operand: operand.replace(/\s+/g,""),
         next: next.replace(/\s+/g,""),
         actions : extractActions((actions||"").trim())
@@ -139,11 +140,14 @@ const extractRules = (text:string): Rule[]=>{
     let rules: Rule[] = [];
 
     const endCondition = (token:string)=>{
-        return token.trim() === "" || token.indexOf("[rule]") !== -1;
+        return token.trim() === "" || token.indexOf("[rule") !== -1;
     }
     while (line < toks.length){
-        if (toks[line].trim().startsWith("[rule]")){
+        if (toks[line].trim().startsWith("[rule")){
             let ruletxt = "";
+            const [_,_type] = toks[line].replace("[","").replace("]","").split(":");
+            const type = _type ? _type : "button";
+            console.log("ok have rule type ", type);
             while (++line < toks.length){
                 if (!endCondition(toks[line])){
                     ruletxt += `\n${toks[line]}`;
@@ -151,7 +155,7 @@ const extractRules = (text:string): Rule[]=>{
                     break;
                 }	
             }
-            rules = [...rules, parseRuleText(ruletxt.trim())]
+            rules = [...rules, parseRuleText(ruletxt.trim(), type)]
         }else{
             line +=1;
         }
@@ -213,7 +217,7 @@ const onStartFromNode = (node:Node):string=>{
 
 const rulesFromNode = (node:Node):string=>{
     return node.rules.reduce((acc:string, rule:Rule)=>{
-        return `${acc}\n\t[rule]\n\t\t[[${rule.operand} ${rule.operator} | ${rule.next}]]\n\t\t[actions]${actionsToString(rule.actions, '\t\t\t')}`
+        return `${acc}\n\t[rule:${rule.type||""}]\n\t\t[[${rule.operand} | ${rule.next}]]\n\t\t[actions]${actionsToString(rule.actions, '\t\t\t')}`
     },"");
 }
 

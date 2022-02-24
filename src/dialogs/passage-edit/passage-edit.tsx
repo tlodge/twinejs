@@ -146,7 +146,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 						const passageobj = convertToObject(passage.text);
 						const _updated = {
 							...passageobj,
-							rules : [...passageobj.rules, ...rules]
+							rules /*: [...passageobj.rules, ...rules]*/
 						}
 						
 						const passagetext = convertToString(_updated);

@@ -22,6 +22,7 @@ export interface AddRulesProps {
 }
 
 export interface Rule {
+	type?: string,
     operator: string
     operand: string
     actions: Action[][]
