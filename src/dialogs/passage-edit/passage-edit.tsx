@@ -158,7 +158,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 				/>		
 				<AddOnStartButton
 					lines={(convertToObject(passage.text||"").onstart || {}).speech || []}
-					actions={[[]]}
+					actions={(convertToObject(passage.text||"").onstart || {}).actions || []}
 					onAdd={handleAddStart}
 				/>
 				{/*<MenuButton

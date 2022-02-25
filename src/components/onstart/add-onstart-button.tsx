@@ -14,6 +14,7 @@ import { AddSpeech } from './add-speech';
 import './add-onstart-button.css';
 import { Speech } from './add-speech';
 import {Action} from './add-actions';
+import { Actions } from '../rules/actions';
 
 export interface AddTagButtonProps {
 	
@@ -34,10 +35,13 @@ export interface AddTagButtonProps {
 }
 
 export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
+
+    console.log("am in add on starty with actions", props.actions);
 	const {icon, label, onAdd} = props;
 	const [creatingStart, setCreatingStart] = React.useState(true);
     const [startType, setStartType] = React.useState('speech');
     const [lines, setLines] = React.useState<Array<Speech>>(props.lines);
+    const [actions, setActions] = React.useState<Action[][]>(props.actions);
 
 	const [open, setOpen] = React.useState(false);
 	const {t} = useTranslation();
@@ -68,6 +72,21 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
         setCreatingStart(true);
 	}
 
+    const deleteAction = (index:number,subindex:number)=>{
+
+    }
+
+    const addAction = (index:number, action:Action)=>{
+
+    }
+
+    const editAction = (index:number, subindex:number, action:Action)=>{
+
+    }
+
+    const addParallelAction = ()=>{
+
+    }
    
 	return (
 		<span className="add-tag-button">
@@ -90,7 +109,11 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
 						{t('components.onStartButton.selectType')}
 					</TextSelect>
                     {startType === "action" && (
-                        <AddActions onAdd={()=>{}}/>
+                        <Actions actions={props.actions} 
+                        deleteAction={(a,s)=>deleteAction(a,s)}
+                        addAction={(aindex:number, _action:Action)=>{addAction(aindex, _action)}}
+                        editAction={(aindex:number, subindex:number, action:Action)=>editAction(aindex,subindex,action)}
+                        addParallelAction={()=>addParallelAction()}/>
                     )}
                     {startType === "speech" && (
                         <AddSpeech lines={lines} onAdd={(lines)=>{setLines(lines)}}/>
