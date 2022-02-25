@@ -95,6 +95,8 @@ const extractSpeech = (text:string) : Speech[]=>{
 }
 
 const extractActions = (text:string) : (Action)[][] =>{
+
+
     const toks = text.split('\n');
     let line = 0;
     let actions:Action[][] = [];
@@ -102,17 +104,24 @@ const extractActions = (text:string) : (Action)[][] =>{
     const endCondition = (token:string)=>{
         return token.trim() === "" || token.indexOf("[") !== -1;
     }
+
+
     while (line < toks.length){
+       
         if (toks[line].trim().startsWith("[action]")){
             let _actions:Action[] = [];
             while (++line < toks.length){
+              
                 if (!endCondition(toks[line])){
                     _actions = [..._actions, parseActionLine(toks[line])]
+                   
                 }else{
+                   
                     break;
                 }	
             }
             actions = [...actions, _actions]
+           
         }else{
             line +=1;
         }
@@ -122,6 +131,8 @@ const extractActions = (text:string) : (Action)[][] =>{
 
 const parseRuleText = (text:string, type:string) : Rule =>{
     const [r, actions] = text.split('[actions]');
+
+    
     const rtoks = r.replace("[[","").replace("]]","").split("|");
     const [operand=""] = rtoks[0].trim().split(" ");
     const next = rtoks.length > 1 ? rtoks[1] : operand;
@@ -140,14 +151,14 @@ const extractRules = (text:string): Rule[]=>{
     let rules: Rule[] = [];
 
     const endCondition = (token:string)=>{
-        return token.trim() === "" || token.indexOf("[rule") !== -1;
+        return /*token.trim() === "" ||*/ token.indexOf("[rule") !== -1;
     }
     while (line < toks.length){
         if (toks[line].trim().startsWith("[rule")){
             let ruletxt = "";
             const [_,_type] = toks[line].replace("[","").replace("]","").split(":");
             const type = _type ? _type : "button";
-            console.log("ok have rule type ", type);
+           
             while (++line < toks.length){
                 if (!endCondition(toks[line])){
                     ruletxt += `\n${toks[line]}`;

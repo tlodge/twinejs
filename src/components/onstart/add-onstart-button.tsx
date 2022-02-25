@@ -36,7 +36,7 @@ export interface AddTagButtonProps {
 export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
 	const {icon, label, onAdd} = props;
 	const [creatingStart, setCreatingStart] = React.useState(true);
-    const [startType, setStartType] = React.useState('');
+    const [startType, setStartType] = React.useState('speech');
     const [lines, setLines] = React.useState<Array<Speech>>(props.lines);
 
 	const [open, setOpen] = React.useState(false);

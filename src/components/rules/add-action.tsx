@@ -1,4 +1,4 @@
-import { IconPlus, IconTrashX } from '@tabler/icons';
+import { IconCheck, IconPlus, IconTrashX } from '@tabler/icons';
 import * as React from 'react';
 import {useTranslation} from 'react-i18next';
 import { Color} from '../../util/color';
@@ -16,6 +16,7 @@ export interface AddActionProps {
 	 */
 	onAdd: (action:Action) => void;
     onClose: () => void;
+    action: Action;
 }
 
 export interface Rule {
@@ -26,8 +27,9 @@ export interface Rule {
 }
 
 export const AddAction: React.FC<AddActionProps> = props => {
-	const {onAdd,onClose} = props;
-	const [_action, _setAction] = React.useState<Action>({action:""});
+	const {onAdd,onClose,action} = props;
+    
+	const [_action, _setAction] = React.useState<Action>(action);
 
 	const {t} = useTranslation();
 
@@ -89,7 +91,7 @@ export const AddAction: React.FC<AddActionProps> = props => {
                     <TextInput style={{width:60}} onChange={e => setDelay(e.target.value)} helptext={`pause in seconds after successful call`} value={`${_action.delay||0}`}>delay</TextInput>
                 </div>
                 <div style={{textAlign:"center"}}>
-                <IconButton icon={<IconPlus />} iconOnly={true} label={""} onClick={()=>onAdd(_action)} variant="primary"/> 
+                <IconButton icon={<IconCheck />} iconOnly={true} label={""} onClick={()=>onAdd(_action)} variant="primary"/> 
                 <IconButton icon={<IconTrashX />} iconOnly={true} label={""} onClick={onClose} variant="primary"/> 
                 </div>
             </div>)

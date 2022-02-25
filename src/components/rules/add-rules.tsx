@@ -1,21 +1,15 @@
-import { IconArrowBarDown, IconArrowBarRight, IconEdit, IconPlus, IconTestPipe, IconTrashX, IconX } from '@tabler/icons';
-import { access } from 'fs';
+import {  IconPlus,  IconX } from '@tabler/icons';
 import * as React from 'react';
-import {composeInitialProps, useTranslation} from 'react-i18next';
-import { Color} from '../../util/color';
+import {useTranslation} from 'react-i18next';
 import { ButtonBar } from '../container/button-bar';
 import { IconButton } from '../control/icon-button';
 import {TextInput} from '../control/text-input';
-import { TextSelect } from '../control/text-select';
-import { Action, AddActions } from '../onstart/add-actions';
-import { AddAction } from './add-action';
+import { Action } from '../onstart/add-actions';
+import { Actions } from './actions';
+
 import './add-rules-button.css';
 
 export interface AddRulesProps {
-	/**
-	 * Called when the user chooses to add a tag. If they are adding a
-	 * pre-existing tag, it will only send a name.
-	 */
 	onAdd: (rules:Rule[]) => void;
 	onCancel:()=>void;
 	rules?: Rule[],
@@ -31,21 +25,46 @@ export interface Rule {
 
 export const AddRules: React.FC<AddRulesProps> = props => {
 	const {onAdd, onCancel} = props;
-	
-	console.log("in add rules with", props.rules);
 	const {t} = useTranslation();
 
-	const [rulewidth, setRuleWidth] = React.useState(40);
-	const [ruleIndex, setRuleIndex] = React.useState(-1);
-	const [actionIndex, setActionIndex] = React.useState(0);
-	
 	const [rules, setRules] = React.useState<Rule[]>(props.rules || [{operator:"equals", operand:"",actions:[],next:""}]);
 
-	const cancel = ()=>{
-		setRuleIndex(-1);
+	const addNewRule = ()=>{
+		setRules([...rules,{operator:"equals", operand:"",actions:[],next:""}]);
 	}
 
-	const insertAction = (actions:Action[][], index:number, action:Action) : Action[][]=>{
+	const removeAction = (actions:Action[][], index:number, subindex:number) : Action[][]=>{
+		
+		if (actions.length <= index){
+			return actions;
+		}
+
+		return (actions || []).reduce((acc:Action[][],actionarr:Action[],j)=>{
+			if (j !== index)
+				return [...acc, actionarr]
+			const newactions =  actionarr.filter((a,i)=>i !== subindex);
+			return newactions.length <= 0 ? acc : [...acc, newactions];
+		},[])
+	}
+
+	const updateAction = (actions:Action[][], index:number, subindex:number, action:Action) : Action[][]=>{
+		
+		if (actions.length <= index){
+			return [...actions, [action]];
+		}
+
+		return (actions || []).reduce((acc:Action[][],actionarr:Action[],j)=>{
+			if (j !== index)
+				return [...acc, actionarr]
+
+			return [...acc, actionarr.map((a,i)=>{
+				return i === subindex ? action : a;
+			})]
+
+		},[])
+	}
+
+	const appendAction = (actions:Action[][], index:number, action:Action) : Action[][]=>{
 		
 		if (actions.length <= index){
 			return [...actions, [action]];
@@ -59,15 +78,62 @@ export const AddRules: React.FC<AddRulesProps> = props => {
 		},[])
 	}
 
-	const addAction = (rindex:number, aindex:number, action:Action)=>{
-		const _rules = rules.reduce((acc:Rule[], rule:Rule, i:Number)=>{
+	const deleteAction = (rindex:number, aindex:number, subindex:number)=>{
+		const _rules = rules.reduce((acc:Rule[], rule:Rule, i:number)=>{
 			if (i !== rindex)
 				return [...acc, rule];
 			return [	
 				...acc, 
 				{
 					...rule, 
-					actions: insertAction(rule.actions, aindex, action)
+					actions: removeAction(rule.actions, aindex, subindex)
+				}	
+			]
+		},[]);
+		setRules(_rules);
+	}
+
+	const editAction = (rindex:number, aindex:number, subindex:number, action:Action)=>{
+		const _rules = rules.reduce((acc:Rule[], rule:Rule, i:number)=>{
+			if (i !== rindex)
+				return [...acc, rule];
+			return [	
+				...acc, 
+				{
+					...rule, 
+					actions: updateAction(rule.actions, aindex, subindex, action)
+				}	
+			]
+		},[]);
+		setRules(_rules);
+	}
+
+	const addParallelAction = (rindex:number)=>{
+		const _rules = rules.reduce((acc:Rule[], rule:Rule, i:number)=>{
+			if (i !== rindex)
+				return [...acc, rule];
+			return [	
+				...acc, 
+				{
+					...rule, 
+					actions: [...rule.actions, [{"action":""}]]				
+				}	
+			]
+		},[]);
+		setRules(_rules);
+		
+		
+	}
+
+	const addAction = (rindex:number, aindex:number, action:Action)=>{
+		const _rules = rules.reduce((acc:Rule[], rule:Rule, i:number)=>{
+			if (i !== rindex)
+				return [...acc, rule];
+			return [	
+				...acc, 
+				{
+					...rule, 
+					actions: appendAction(rule.actions, aindex, action)
 				}	
 			]
 		},[]);
@@ -75,7 +141,6 @@ export const AddRules: React.FC<AddRulesProps> = props => {
 	}
 
 	const setOperand = (index:number, operand:string)=>{
-		setRuleWidth(operand.length * 9);
 		setRules(rules.reduce((acc:Rule[], item:Rule, i:number)=>{
 			if (i !== index)
 				return [...acc, item];
@@ -84,19 +149,11 @@ export const AddRules: React.FC<AddRulesProps> = props => {
 	}
 
 	const setNext = (index:number, next:string)=>{
-		console.log("setting next!!", index, next);
-
 		setRules(rules.reduce((acc:Rule[], item:Rule, i:number)=>{
 			if (i !== index)
 				return [...acc, item];
 			return [...acc, {...item, next}];
 		},[]));
-
-		console.log("rules are now", rules.reduce((acc:Rule[], item:Rule, i:number)=>{
-			if (i !== index)
-				return [...acc, item];
-			return [...acc, {...item, next}];
-		},[]))
 	}
 
 	const renderNext = (index:number, next:string)=>{
@@ -105,6 +162,8 @@ export const AddRules: React.FC<AddRulesProps> = props => {
 			<TextInput placeholder="next part" style={{padding:2}} onChange={e => setNext(index,e.target.value)} value={next}></TextInput> 
 		</div>
 	}
+
+
 	const renderRule = (index:number, rule:Rule)=>{
 		
 		return (<div style={{padding:7, background:"#cfe4fc", borderRadius:5, marginBottom:5}}>
@@ -115,61 +174,14 @@ export const AddRules: React.FC<AddRulesProps> = props => {
 					</div>
 					<div>is pressed, call</div>
 				</div>
-				{renderActions(index,rule.actions)}
+				<Actions actions={rule.actions} 
+						 deleteAction={(a,s)=>deleteAction(index, a,s)}
+						 addAction={(aindex:number, _action:Action)=>{addAction(index, aindex, _action)}}
+						 editAction={(aindex:number, subindex:number, action:Action)=>editAction(index,aindex,subindex,action)}
+						 addParallelAction={()=>addParallelAction(index)}/>
+				
 				{renderNext(index,rule.next||"")}
 			</div>)
-	}
-
-	const bootstrap = (index:number)=>{
-		return (<>				
-				{ruleIndex === index && <AddAction onClose={cancel} onAdd={(_action)=>{cancel(); addAction(index, 0, _action)}}/>}
-				<div style={{textAlign:"center"}}>
-					<IconButton icon={<IconPlus />} iconOnly={true} label={""} onClick={()=>setRuleIndex(index)} variant="primary"/> 
-				</div>
-		</>)
-	}
-	const renderActions = (index:number, actions:Action[][])=>{
-		console.log("rendering actions", actions);
-
-		if (actions.length <= 0){
-			return bootstrap(index);
-		}else{
-			const lines = actions.map((arr, aindex)=>{
-				
-				const rows =  arr.map((action=>{
-					return <div style={{padding:7}}>
-						<div style={{display:"flex", flexDirection:"row", alignItems:"center"}}>
-							<div style={{display: "flex", flex: "1 1 auto", flexDirection:"column"}}>
-								<div style={{padding:4,display:"flex", flexDirection:"column"}}>
-									<div style={{flex: "1 1 auto", fontSize:"0.9em", fontWeight:700}}>{action.action.toString()}</div> 
-								</div>
-								<div style={{padding:4,display:"flex", flexDirection:"row"}}>
-									<div style={{flex: "1 1 auto", fontSize:"0.9em"}}>then wait {action.delay} s</div> 
-								</div>
-							</div>	
-							<div style={{display:"flex", flexDirection:"row"}}>
-								<IconButton icon={<IconEdit />} iconOnly={true} label={""} onClick={()=>{setRuleIndex(index); setActionIndex(aindex)}} variant="primary"/>
-								<IconButton icon={<IconTrashX />} iconOnly={true} label={""} onClick={()=>{setRuleIndex(index); setActionIndex(aindex)}} variant="primary"/>
-								<IconButton icon={<IconPlus />} iconOnly={true} label={""} onClick={()=>{setRuleIndex(index); setActionIndex(aindex)}} variant="primary"/>
-							</div>
-						</div>
-					</div>
-				}))
-				//							
-				return <div>
-					{rows}
-				</div>
-				
-			})
-			return (<>
-				<div style={{marginLeft:10}}>
-					{ruleIndex === index && <AddAction onClose={cancel} onAdd={(_action)=>{cancel();addAction(index,actionIndex,_action)}}/>}
-					{lines}
-				</div>
-				<IconButton icon={<IconArrowBarRight />} style={{fontSize:"0.8em"}} label={"add parallel action(s)"} onClick={()=>{setRuleIndex(index); setActionIndex(actions.length+1)}} variant="primary"/> 
-				</>
-			)
-		}
 	}
 
 	const renderRules = ()=>{
@@ -182,7 +194,7 @@ export const AddRules: React.FC<AddRulesProps> = props => {
 			<div id="rules" style={{marginBottom:40}}>		
 				{renderRules()}
 				<div style={{textAlign:"center"}}>
-					<IconButton icon={<IconPlus />} iconOnly={false} label={"add another rule"} onClick={()=>{}} variant="primary"/>
+					<IconButton icon={<IconPlus />} iconOnly={false} label={"add another rule"} onClick={addNewRule} variant="primary"/>
 				</div>
 			</div>
 			<div style={{position:"fixed", display:"flex", justifyContent:"center", width:370, bottom:0, background:"white"}}>
