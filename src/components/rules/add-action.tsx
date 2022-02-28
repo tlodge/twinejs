@@ -1,7 +1,6 @@
-import { IconCheck, IconPlus, IconTrashX } from '@tabler/icons';
+import { IconCheck, IconTrashX } from '@tabler/icons';
 import * as React from 'react';
 import {useTranslation} from 'react-i18next';
-import { Color} from '../../util/color';
 import { IconButton } from '../control/icon-button';
 import {TextInput} from '../control/text-input';
 import { TextSelect } from '../control/text-select';
@@ -67,8 +66,18 @@ export const AddAction: React.FC<AddActionProps> = props => {
     const setDelay = (delay:string="0")=>{
         _setAction({ 
            ..._action,
-           delay: Number(delay),
+           delay: isNaN(Number(delay)) ? 0 : Number(delay)
         })
+    }
+
+    const _format = (action:Action)=>{
+        return {
+            ...action,
+            delay: isNaN(Number(action.delay)) ? 0 : Number(action.delay),
+            method: action.method ? action.method : Method.GET,
+            params: action.params || "",
+        }
+
     }
 
 	return (<div className="add-dialogue">
@@ -91,7 +100,7 @@ export const AddAction: React.FC<AddActionProps> = props => {
                     <TextInput style={{width:60}} onChange={e => setDelay(e.target.value)} helptext={`pause in seconds after successful call`} value={`${_action.delay||0}`}>delay</TextInput>
                 </div>
                 <div style={{textAlign:"center"}}>
-                <IconButton icon={<IconCheck />} iconOnly={true} label={""} onClick={()=>onAdd(_action)} variant="primary"/> 
+                <IconButton icon={<IconCheck />} iconOnly={true} label={""} onClick={()=>onAdd(_format(_action))} variant="primary"/> 
                 <IconButton icon={<IconTrashX />} iconOnly={true} label={""} onClick={onClose} variant="primary"/> 
                 </div>
             </div>)

@@ -48,6 +48,7 @@ export const Actions: React.FC<ActionsProps> = props => {
         close();
         props.addAction(aindex,action)
     }
+
     const bootstrap = ()=>{
         return (<>				
                 {<AddAction onClose={close} action={{action:""}} onAdd={(_action:Action)=>addAction(0,_action)}/>}
@@ -81,7 +82,7 @@ export const Actions: React.FC<ActionsProps> = props => {
                     </div>
                 </div>
             }))					
-            return <div style={{borderLeft:"2px solid white", marginBottom:10}}>
+            return <div style={{borderLeft:"2px solid black", marginBottom:10}}>
                 {rows}
             </div>
         })

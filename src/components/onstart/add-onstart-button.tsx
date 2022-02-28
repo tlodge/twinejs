@@ -1,42 +1,27 @@
 import * as React from 'react';
 import {useTranslation} from 'react-i18next';
-import {colors, Color} from '../../util/color';
 import {IconPlus, IconX} from '@tabler/icons';
 import {ButtonBar} from '../container/button-bar';
 import {CardContent} from '../container/card';
 import {CardButton} from '../control/card-button';
 import {IconButton} from '../control/icon-button';
-import {TextInput} from '../control/text-input';
 import {TextSelect} from '../control/text-select';
-import {isValidTagName} from '../../util/tag';
-import { AddActions } from './add-actions';
 import { AddSpeech } from './add-speech';
 import './add-onstart-button.css';
 import { Speech } from './add-speech';
 import {Action} from './add-actions';
 import { Actions } from '../rules/actions';
 
-export interface AddTagButtonProps {
-	
-    
+export interface AddOnStartButtonProps {
 	icon?: React.ReactNode;
-	/**
-	 * Label for the button.
-	 */
 	label?: string;
-	/**
-	 * Called when the user chooses to add a tag. If they are adding a
-	 * pre-existing tag, it will only send a name.
-	 */
-	onAdd: (lines:Speech[]) => void;
-
+	onAdd: (lines:Speech[], actions:Action[][]) => void;
     lines: Speech[]
     actions: Action[][]
 }
 
-export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
+export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
 
-    console.log("am in add on starty with actions", props.actions);
 	const {icon, label, onAdd} = props;
 	const [creatingStart, setCreatingStart] = React.useState(true);
     const [startType, setStartType] = React.useState('speech');
@@ -47,22 +32,10 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
 	const {t} = useTranslation();
 
 	let validationMessage: string | undefined = undefined;
-	let canAdd = lines.length > 0;//isValidTagName(newName);
-
-	/*if (!canAdd && newName !== '') {
-		validationMessage = t('components.addTagButton.invalidName');
-	}
-
-	if (canAdd && creatingStart) {
-		canAdd = !existingTags.includes(newName);
-
-		if (!canAdd) {
-			validationMessage = t('components.addTagButton.alreadyAdded');
-		}
-	}*/
+	let canAdd = lines.length > 0;
 
 	function handleAdd() {
-		onAdd(lines);
+		onAdd(lines,actions);
 		setOpen(false);
 	}
 
@@ -72,21 +45,55 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
         setCreatingStart(true);
 	}
 
-    const deleteAction = (index:number,subindex:number)=>{
-
+    const deleteAction = (aindex:number,subindex:number)=>{
+        const _actions:Action[][] =  actions.reduce((acc:Action[][], arr:Action[], index:number)=>{
+            if (aindex===index){
+                if (subindex === 0 && arr.length === 1){
+                    return acc;
+                }
+                return [...acc, arr.reduce((acc:Action[], item:Action, si:number)=>{
+                    if (si === subindex)
+                        return acc;
+                    return [...acc, item];
+                },[])]
+            }
+            return [...acc, arr];
+        },[]);
+        setActions(_actions);
     }
 
-    const addAction = (index:number, action:Action)=>{
+   
+    const addAction = (aindex:number, action:Action)=>{
+        if (actions.length === 0){
+            setActions([[action]])
+        }
+        else{
+            const _actions:Action[][] =  actions.map((arr, index)=>{
+                return index===aindex ? [...arr, action] : arr;
+            });
+            setActions(_actions);
+        }
+    }
+    
 
+    const editAction = (aindex:number,subindex:number, action:Action)=>{
+        const _actions:Action[][] =  actions.reduce((acc:Action[][], arr:Action[], index:number)=>{
+            if (aindex===index){
+                return [...acc, arr.reduce((acc:Action[], item:Action, si:number)=>{
+                    if (si === subindex)
+                        return [...acc,action]
+                    return [...acc, item];
+                },[])]
+            }
+            return [...acc, arr];
+        },[]);
+        setActions(_actions);
     }
 
-    const editAction = (index:number, subindex:number, action:Action)=>{
-
-    }
 
     const addParallelAction = ()=>{
-
-    }
+		setActions([...actions,[{"action":""}]]);
+	}
    
 	return (
 		<span className="add-tag-button">
@@ -94,7 +101,7 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
 				disabled={false}
 				icon={icon ?? <IconPlus />}
 				label={label ?? t('common.onstart')}
-				onChangeOpen={setOpen}
+				onChangeOpen={(e)=>{setOpen(true)}}
 				open={open}
 			>
 				<CardContent style={{width:400}}>
@@ -109,7 +116,7 @@ export const AddOnStartButton: React.FC<AddTagButtonProps> = props => {
 						{t('components.onStartButton.selectType')}
 					</TextSelect>
                     {startType === "action" && (
-                        <Actions actions={props.actions} 
+                        <Actions actions={actions} 
                         deleteAction={(a,s)=>deleteAction(a,s)}
                         addAction={(aindex:number, _action:Action)=>{addAction(aindex, _action)}}
                         editAction={(aindex:number, subindex:number, action:Action)=>editAction(aindex,subindex,action)}

@@ -121,8 +121,6 @@ export const AddRules: React.FC<AddRulesProps> = props => {
 			]
 		},[]);
 		setRules(_rules);
-		
-		
 	}
 
 	const addAction = (rindex:number, aindex:number, action:Action)=>{
@@ -172,13 +170,16 @@ export const AddRules: React.FC<AddRulesProps> = props => {
 					<div style={{marginTop:2}}>
 						<TextInput placeholder="name" style={{padding:2,width:Math.max(20,rule.operand.length * 9)}} onChange={e => setOperand(index, e.target.value)} value={rule.operand}></TextInput> 
 					</div>
-					<div>is pressed, call</div>
+					<div onClick={()=>{
+						addAction(0,0,{"action":""})
+					}}>is pressed, call {rule.actions.length <= 0 ? "nothing" : ""} </div>
 				</div>
-				<Actions actions={rule.actions} 
+				
+				{rule.actions.length > 0 && <Actions actions={rule.actions} 
 						 deleteAction={(a,s)=>deleteAction(index, a,s)}
 						 addAction={(aindex:number, _action:Action)=>{addAction(index, aindex, _action)}}
 						 editAction={(aindex:number, subindex:number, action:Action)=>editAction(index,aindex,subindex,action)}
-						 addParallelAction={()=>addParallelAction(index)}/>
+						 addParallelAction={()=>addParallelAction(index)}/>}
 				
 				{renderNext(index,rule.next||"")}
 			</div>)

@@ -206,7 +206,7 @@ const paramToTuple = (params:any) : string=>{
 
 const actionToString = (actions:Action[], sep:string='\t\t\t'):string=>{
     return (actions || []).reduce((acc:string,a:Action)=>{
-        return `${acc}${sep}("${a.action}","${a.delay}","${paramToTuple(a.params)}","${a.method}")\n`
+        return `${acc}${sep}("${a.action}","${a.delay||0}","${paramToTuple(a.params)}","${a.method}")\n`
     },"");
 }
 
@@ -228,7 +228,8 @@ const onStartFromNode = (node:Node):string=>{
 
 const rulesFromNode = (node:Node):string=>{
     return node.rules.reduce((acc:string, rule:Rule)=>{
-        return `${acc}\n\t[rule:${rule.type||""}]\n\t\t[[${rule.operand} | ${rule.next}]]\n\t\t[actions]${actionsToString(rule.actions, '\t\t\t')}`
+        const actionstr = (rule.actions && rule.actions.length > 0) ? `\n\t\t[actions]${actionsToString(rule.actions, '\t\t\t')}`:"";
+        return `${acc}\n\t[rule:${rule.type||""}]\n\t\t[[${rule.operand} | ${rule.next}]]${actionstr}`
     },"");
 }
 

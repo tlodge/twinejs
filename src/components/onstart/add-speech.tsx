@@ -19,8 +19,6 @@ export interface AddSpeechProps {
     lines: Speech[]
 }
 
-
-
 export const AddSpeech: React.FC<AddSpeechProps> = props => {
 	const {onAdd, lines} = props;
     const lastline = lines.length > 0 ? lines[lines.length-1] : {};

@@ -1,5 +1,8 @@
 (function(window){
 
+    const DEFAULTRATE 	= 180;
+    const DEFAULTDELAY 	= 0;
+    const DEFAULTVOICE = "Daniel";
 
     const extractLinksFromText = (text)=>{
         var links = text.match(/\[\[.+?\]\]/g);
@@ -133,10 +136,201 @@
         return dict;
     }
 
-    console.log("This is better!");
-    let storydata = document.querySelector('tw-storydata');
-    console.log(storydata);
+    const extractOnstart = (text) =>{
+        if (text.indexOf("[onstart]") !== -1){
+            return text.substring(text.indexOf("[onstart]")).split("[rules]")[0].replace("[onstart]","").trim();
+        }
+        return "";
+    }
+    
+    const extractRulesText = (text) =>{
+        if (text.indexOf("[rules]") !== -1){
+            return text.substring(text.indexOf("[rules]")).replace("[rules]","").trim();
+        }
+        return "";
+    }
+    
+    const parseSpeechLine = (line) =>{
+        const tokens = line.replace("[speech]","").replace( /[()]/g,"").replace(/["]/g,"").trim().split(',');
+        return {
+            words:tokens.length > 0 ? tokens[0].trim(): "", 
+            voice:tokens.length > 1 ? tokens[1].trim(): `${DEFAULTVOICE}`,
+            rate:tokens.length  > 2 ? tokens[2].trim(): `${DEFAULTRATE}`, 
+            delay:tokens.length > 3 ? tokens[3].trim(): `${DEFAULTDELAY}`
+        }
+    }
+    
+    const extractParams = (tuplestr) =>{
+        if (tuplestr.trim()===""){
+            return {};
+        }
+        const [first, ...rest] = tuplestr.replace( /[()]/g,"").replace(/["]/g,"").trim().split(',');
+        return {
+            [first] : rest.length > 1 ? extractParams(rest.join(",")) : rest[0]
+        }
+    }
+    
+    const extractParamsString = (str)=>{
+        const toks = str.trim().substring(1, str.trim().length-1);
+        const si = toks.indexOf("(");
+        const ei = toks.lastIndexOf(")");
+        return si > -1 && ei > -1 ? toks.substring(si,ei+1) : "";
+    }
+    
+    const parseActionLine = (line) =>{
+        const params = extractParamsString(line);
+        const toks = line.replace(params,"").replace( /[()]/g,"").replace(/["]/g,"").trim().split(',');
+        if (toks.length > 0){
+            return {
+                action: toks[0].startsWith("http") ? new URL(toks[0]):toks[0], 
+                delay: toks.length > 1 ? Number(toks[1].trim()) : 0, 
+                params: toks.length > 2 ? params : "",//extractParams(params) : {},
+                method: toks.length > 3 ? toks[2] === "POST" ? "POST" : "GET" : "" 
+            }
+        }
+        return {action:""}
+    }
+    
+    const extractSpeech = (text) =>{
+        
+        const toks = text.split('\n');
+        let line = 0;
+        let speech = [];
+    
+        const endCondition = (token)=>{
+            return token.trim() === "" || token.indexOf("[") !== -1;
+        }
+        while (line < toks.length){
+            if (toks[line].trim().startsWith("[speech]")){
+                while (++line < toks.length){
+                    if (!endCondition(toks[line])){
+                        speech = [...speech, parseSpeechLine(toks[line])]
+                    }else{
+                        break;
+                    }	
+                }
+            }
+            line +=1;
+        }
+        return speech;
+    }
+    
+    const extractActions = (text) =>{
+    
+    
+        const toks = text.split('\n');
+        let line = 0;
+        let actions = [];
+    
+        const endCondition = (token)=>{
+            return token.trim() === "" || token.indexOf("[") !== -1;
+        }
+    
+    
+        while (line < toks.length){
+           
+            if (toks[line].trim().startsWith("[action]")){
+                let _actions = [];
+                while (++line < toks.length){
+                  
+                    if (!endCondition(toks[line])){
+                        _actions = [..._actions, parseActionLine(toks[line])]
+                       
+                    }else{
+                       
+                        break;
+                    }	
+                }
+                actions = [...actions, _actions]
+               
+            }else{
+                line +=1;
+            }
+        }
+        return actions;
+    }
+    
+    const parseRuleText = (text, type) =>{
+        const [r, actions] = text.split('[actions]');
+        const rtoks = r.replace("[[","").replace("]]","").split("|");
+        const [operand=""] = rtoks[0].trim().split(" ");
+        const next = rtoks.length > 1 ? rtoks[1] : operand;
+        return  {
+            type,
+            operator: 'equals', 
+            operand: operand.replace(/\s+/g,""),
+            next: next.replace(/\s+/g,""),
+            actions : extractActions((actions||"").trim())
+        }
+    }
+    
+    const extractRules = (text) =>{
+        const toks = text.trim().replace("[rules]","").split('\n');
+        let line = 0;
+        let rules = [];
+    
+        const endCondition = (token)=>{
+            return /*token.trim() === "" ||*/ token.indexOf("[rule") !== -1;
+        }
+        while (line < toks.length){
+            if (toks[line].trim().startsWith("[rule")){
+                let ruletxt = "";
+                const [_,_type] = toks[line].replace("[","").replace("]","").split(":");
+                const type = _type ? _type : "button";
+               
+                while (++line < toks.length){
+                    if (!endCondition(toks[line])){
+                        ruletxt += `\n${toks[line]}`;
+                    }else{
+                        break;
+                    }	
+                }
+                rules = [...rules, parseRuleText(ruletxt.trim(), type)]
+            }else{
+                line +=1;
+            }
+        }
+        return rules;
+    }
+    
+    const convertToObject = (text)=>{
+
+        const onstarttext = extractOnstart(text); 
+        const speech = extractSpeech(onstarttext)
+        const actions = extractActions(onstarttext);
+        const rules = extractRules(extractRulesText(text));
+    
+        return {
+            onstart : {
+                speech,
+                actions
+            },
+            rules
+        }
+    }
+
     var storyData = document.getElementsByTagName("tw-storydata")[0];
-    var json = JSON.stringify(convertStory(storyData), null, 2);
-    console.log(json);
+    var json = convertStory(storyData);
+
+    const passages = json.passages;
+
+    const eligiblePassage = (text)=>{
+        return text.indexOf("[onstart]" !== -1) || text.indexOf("[actions]") !== -1 || text.indexOf("[rules]") !== -1;
+    }
+
+    const nodes = (passages||[]).reduce((acc, passage)=>{
+        if (passage.text && (passage.text.replace(/\s/g, '') !== "" && eligiblePassage(passage.text))){
+            return [...acc,convertToObject(passage.text)]
+        }else{
+            return acc;
+        }
+    },[]);
+
+   
+    const root = document.createElement('pre');
+    const output = document.createTextNode(JSON.stringify(nodes,null,4));
+    root.appendChild(output);
+    document.body.appendChild(root);
+    console.log("nodes are", nodes);
+
 })(window);

@@ -36,6 +36,7 @@ import { AddSpeech, Speech } from '../../components/onstart/add-speech';
 import { Rule } from '../../components/rules/add-rules';
 
 import {convertToObject, convertToString} from '../../util/caravan';
+import { Action } from '../../components/onstart/add-actions';
 
 
 export interface PassageEditDialogProps
@@ -66,12 +67,12 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 		[dispatch, passage, story]
 	);
 
-	const handleAddStart = React.useCallback((lines : Speech[])=>{
+	const handleAddStart = React.useCallback((speech : Speech[], actions:Action[][])=>{
 		//get the current text and turn into a node object
 		const passageobj = convertToObject(passage.text);
 
 		//set the new text using a passage object modified with speech lines
-		const passagetext = convertToString({...passageobj, onstart:{...passageobj.onstart, speech:lines}});
+		const passagetext = convertToString({...passageobj, onstart:{...passageobj.onstart, speech, actions}});
 		
 		//update the passage object
 		dispatch(updatePassage(story, passage, {text: passagetext}));
