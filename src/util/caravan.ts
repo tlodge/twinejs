@@ -8,11 +8,25 @@ const DEFAULTVOICE = "Daniel";
 
 
 export interface Node{
+    type:string,
     onstart : {
         actions?:Action[][]
         speech?:Speech[]
     }
     rules : Rule[]
+}
+
+const extractType = (text:string): string=>{
+    const toks = text.split("\n");
+    for (let i = 0; i < toks.length; i++){
+        if (toks[i].indexOf("[type") != -1){
+            const typetoks = toks[i].split(":");
+            if (typetoks.length > 1)
+                return typetoks[1].replace("]","").trim();
+            return "button";
+        }
+    }
+    return "button";
 }
 
 const extractOnstart = (text:string) : string=>{
@@ -26,6 +40,7 @@ const extractRulesText = (text:string) : string=>{
     if (text.indexOf("[rules]") !== -1){
         return text.substring(text.indexOf("[rules]")).replace("[rules]","").trim();
     }
+  
     return "";
 }
 
@@ -177,12 +192,14 @@ const extractRules = (text:string): Rule[]=>{
 
 export function convertToObject(text:string): Node{
 
+    const typetext = extractType(text);
     const onstarttext = extractOnstart(text); 
     const speech = extractSpeech(onstarttext)
     const actions = extractActions(onstarttext);
     const rules = extractRules(extractRulesText(text));
-
+    
     return {
+        type: typetext,
         onstart : {
             speech,
             actions
@@ -234,5 +251,5 @@ const rulesFromNode = (node:Node):string=>{
 }
 
 export function convertToString(node:Node): string{
-    return `[onstart]\n\n${onStartFromNode(node)}\n[rules]\n${rulesFromNode(node)}`
+    return `[type:${node.type}]\n\n[onstart]\n\n${onStartFromNode(node)}\n[rules]\n${rulesFromNode(node)}`
 }

@@ -136,6 +136,19 @@
         return dict;
     }
 
+    const extractType = (text)=>{
+        const toks = text.split("\n");
+        for (let i = 0; i < toks.length; i++){
+            if (toks[i].indexOf("[type") != -1){
+                const typetoks = toks[i].split(":");
+                if (typetoks.length > 1)
+                    return typetoks[1].replace("]","").trim();
+                return "button";
+            }
+        }
+        return "button";
+    }
+
     const extractOnstart = (text) =>{
         if (text.indexOf("[onstart]") !== -1){
             return text.substring(text.indexOf("[onstart]")).split("[rules]")[0].replace("[onstart]","").trim();
@@ -160,31 +173,38 @@
         }
     }
     
+     //('query',('rotate',false','power','1','cool','true'))))
     const extractParams = (tuplestr) =>{
-        if (tuplestr.trim()===""){
-            return {};
-        }
-        const [first, ...rest] = tuplestr.replace( /[()]/g,"").replace(/["]/g,"").trim().split(',');
-        return {
-            [first] : rest.length > 1 ? extractParams(rest.join(",")) : rest[0]
+        const jsonstr = (tuplestr||"{}").replace(/[(]/g,"{").replace(/[)]/g,"}").replace(/[']/g,"\"");
+        try{
+            const result = JSON.parse(jsonstr);
+            return result
+        }catch(err){
+            console.err("error parsing", jsonstr);
+            return {}
         }
     }
     
+   
     const extractParamsString = (str)=>{
         const toks = str.trim().substring(1, str.trim().length-1);
         const si = toks.indexOf("(");
         const ei = toks.lastIndexOf(")");
         return si > -1 && ei > -1 ? toks.substring(si,ei+1) : "";
     }
-    
+
     const parseActionLine = (line) =>{
         const params = extractParamsString(line);
         const toks = line.replace(params,"").replace( /[()]/g,"").replace(/["]/g,"").trim().split(',');
         if (toks.length > 0){
+            const jsonstr = (params||"{}").replace(/[(]/g,"{").replace(/[)]/g,"}").replace(/[']/g,"\"");
+            console.log("parsing", jsonstr);
+            console.log(JSON.parse(jsonstr));
+
             return {
                 action: toks[0].startsWith("http") ? new URL(toks[0]):toks[0], 
                 delay: toks.length > 1 ? Number(toks[1].trim()) : 0, 
-                params: toks.length > 2 ? params : "",//extractParams(params) : {},
+                params: toks.length > 2 ? extractParams(params) : {},
                 method: toks.length > 3 ? toks[2] === "POST" ? "POST" : "GET" : "" 
             }
         }
@@ -249,6 +269,62 @@
         }
         return actions;
     }
+
+    const simplifyOnstart = (onstart)=>{
+        return Object.keys(onstart).reduce((acc, key)=>{
+            if (key === "speech" && onstart[key] && onstart[key].length > 0){
+                return {...acc, [key]: onstart[key]}
+            }
+            if (key === "actions" && onstart[key].length > 0 && onstart[key][0].length > 0){
+                return {...acc, [key]: onstart[key].map(a=>simplifyActions(a))}
+            }
+            return acc;
+        },{})
+    }
+
+    const simplifyAction = (a)=>{
+        let action = {
+            action: a.action,
+        };
+
+        if (a.params && Object.keys(a.params).length > 0){
+            action = {
+                ...action,
+                params: a.params,
+                method: a.method,
+            }
+        }
+        if (a.delay !== undefined && a.delay > 0){
+            action = {
+                ...action,
+                delay: a.delay
+            }
+        }
+        return action;
+    }
+    const simplifyActions = (actions)=>{
+        return actions.map(a=>simplifyAction(a));
+    }
+
+    const simplifyRules = (rules)=>{
+        return rules.reduce((acc, rule)=>{
+            return [...acc,{...rule, actions:rule.actions.map(a=>simplifyActions(a))}]
+        },[]);
+    }
+
+    const simplify = (nodes)=>{
+        return nodes.map(n=>{
+            return Object.keys(n).reduce((acc, key)=>{
+                if (key === "onstart"){
+                    return {...acc, onstart:simplifyOnstart(n.onstart)}
+                }
+                if (key === "rules"){
+                    return {...acc, rules:simplifyRules(n.rules)}
+                }
+                return {...acc, [key]:n[key]}
+            },{});
+        })
+    }
     
     const parseRuleText = (text, type) =>{
         const [r, actions] = text.split('[actions]');
@@ -257,10 +333,12 @@
         const next = rtoks.length > 1 ? rtoks[1] : operand;
         return  {
             type,
-            operator: 'equals', 
-            operand: operand.replace(/\s+/g,""),
-            next: next.replace(/\s+/g,""),
-            actions : extractActions((actions||"").trim())
+            rule:{
+                operator: 'equals', 
+                operand: operand.replace(/\s+/g,"")
+            },
+            actions : extractActions((actions||"").trim()),
+            next: next.replace(/\s+/g,"")
         }
     }
     
@@ -293,14 +371,20 @@
         return rules;
     }
     
-    const convertToObject = (text)=>{
+    const convertToObject = (name, text)=>{
 
+        const type = extractType(text);
         const onstarttext = extractOnstart(text); 
         const speech = extractSpeech(onstarttext)
         const actions = extractActions(onstarttext);
         const rules = extractRules(extractRulesText(text));
     
         return {
+            type,
+            name,
+            id:name,
+            data: rules.map(r=>r.operand),
+            subscription: type === "speech" ? "/speech" : "/press",
             onstart : {
                 speech,
                 actions
@@ -311,26 +395,40 @@
 
     var storyData = document.getElementsByTagName("tw-storydata")[0];
     var json = convertStory(storyData);
+    console.log(json);
 
-    const passages = json.passages;
+
+    const {passages, startnode, name} = json;
 
     const eligiblePassage = (text)=>{
         return text.indexOf("[onstart]" !== -1) || text.indexOf("[actions]") !== -1 || text.indexOf("[rules]") !== -1;
     }
+    let event = "";
 
     const nodes = (passages||[]).reduce((acc, passage)=>{
+        if (passage.pid === startnode){
+            event = passage.name;
+        }    
         if (passage.text && (passage.text.replace(/\s/g, '') !== "" && eligiblePassage(passage.text))){
-            return [...acc,convertToObject(passage.text)]
+            return [...acc,convertToObject(passage.name,passage.text)]
         }else{
             return acc;
         }
     },[]);
 
+    const root = {
+        id: name,
+        start: {
+            actions: [[]],
+            event,
+        },
+        events:simplify(nodes),
+    };
    
-    const root = document.createElement('pre');
-    const output = document.createTextNode(JSON.stringify(nodes,null,4));
-    root.appendChild(output);
-    document.body.appendChild(root);
-    console.log("nodes are", nodes);
+    const rootdom = document.createElement('pre');
+    const output = document.createTextNode(JSON.stringify(root,null,4));
+    rootdom.appendChild(output);
+    document.body.appendChild(rootdom);
+    //console.log("nodes are", nodes);
 
 })(window);
