@@ -371,8 +371,8 @@
         return rules;
     }
     
-    const convertToObject = (name, text)=>{
-
+    const convertToObject = (_name, text)=>{
+        const name = _name.replace(/\s+/g,"");
         const type = extractType(text);
         const onstarttext = extractOnstart(text); 
         const speech = extractSpeech(onstarttext)
@@ -383,7 +383,7 @@
             type,
             name,
             id:name,
-            data: rules.map(r=>r.operand),
+            data: rules.map(r=>r.rule.operand),
             subscription: type === "speech" ? "/speech" : "/press",
             onstart : {
                 speech,
@@ -416,14 +416,14 @@
         }
     },[]);
 
-    const root = {
+    const root = [{
         id: name,
         start: {
             actions: [[]],
             event,
         },
         events:simplify(nodes),
-    };
+    }];
    
     const rootdom = document.createElement('pre');
     const output = document.createTextNode(JSON.stringify(root,null,4));
