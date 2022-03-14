@@ -15,7 +15,7 @@ export interface RouteToolbarProps {
 export const RouteToolbar: React.FC<RouteToolbarProps> = props => {
 	const {helpUrl = 'https://twinery.org/2guide', pinnedControls, tabs} = props;
 	const {t} = useTranslation();
-
+	
 	return (
 		<div className="route-toolbar">
 			<Tabs selectedTabClassName="selected">

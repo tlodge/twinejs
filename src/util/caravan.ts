@@ -54,14 +54,14 @@ const parseSpeechLine = (line:string) : Speech =>{
     }
 }
 
-const extractParams = (tuplestr:string) : object=>{
-    if (tuplestr.trim()===""){
-        return {};
+const extractParams = (tuplestr:string="()") : Record<string,any>=>{
+    const str = tuplestr.replace( /[(]/g,"{").replace(/[)]/g,"}");
+    try{
+        return JSON.parse(str);
+    }catch(err){
+        console.log("error parsing", err);
     }
-    const [first, ...rest] = tuplestr.replace( /[()]/g,"").replace(/["]/g,"").trim().split(',');
-    return {
-        [first] : rest.length > 1 ? extractParams(rest.join(",")) : rest[0]
-    }
+    return {};
 }
 
 const extractParamsString = (str:string)=>{
@@ -117,10 +117,10 @@ const extractActions = (text:string) : (Action)[][] =>{
     let actions:Action[][] = [];
 
     const endCondition = (token:string)=>{
-        return token.trim() === "" || token.indexOf("[") !== -1;
+        return token.trim() === "" || token.trim().startsWith("[");
     }
 
-
+   
     while (line < toks.length){
        
         if (toks[line].trim().startsWith("[action]")){
@@ -129,9 +129,7 @@ const extractActions = (text:string) : (Action)[][] =>{
               
                 if (!endCondition(toks[line])){
                     _actions = [..._actions, parseActionLine(toks[line])]
-                   
                 }else{
-                   
                     break;
                 }	
             }
@@ -141,6 +139,7 @@ const extractActions = (text:string) : (Action)[][] =>{
             line +=1;
         }
     }
+  
     return actions;
 }
 
@@ -190,35 +189,9 @@ const extractRules = (text:string): Rule[]=>{
 }
 
 
-export function convertToObject(text:string): Node{
-
-    const typetext = extractType(text);
-    const onstarttext = extractOnstart(text); 
-    const speech = extractSpeech(onstarttext)
-    const actions = extractActions(onstarttext);
-    const rules = extractRules(extractRulesText(text));
-    
-    return {
-        type: typetext,
-        onstart : {
-            speech,
-            actions
-        },
-        rules
-    }
-}
 
 const paramToTuple = (params:any) : string=>{
     return params;
-    if (Object.keys(params).length <= 0)
-        return "";
-    return Object.keys(params).reduce((acc:string, key:string)=>{
-        if ( typeof params[key] === "string"){
-            return `${acc}("${key}", "${params[key]}")`
-        }else{
-            return `${acc}("${key}", ${paramToTuple(params[key])})`
-        }
-    },"");
 }
 
 const actionToString = (actions:Action[], sep:string='\t\t\t'):string=>{
@@ -246,10 +219,82 @@ const onStartFromNode = (node:Node):string=>{
 const rulesFromNode = (node:Node):string=>{
     return node.rules.reduce((acc:string, rule:Rule)=>{
         const actionstr = (rule.actions && rule.actions.length > 0) ? `\n\t\t[actions]${actionsToString(rule.actions, '\t\t\t')}`:"";
-        return `${acc}\n\t[rule:${rule.type||""}]\n\t\t[[${rule.operand} | ${rule.next}]]${actionstr}`
+        return `${acc}\n\t[rule:${rule.type||""}]\n\t\t[[${rule.operand}|${rule.next}]]${actionstr}`
     },"");
+}
+
+
+ /*return [...acc, (rule.actions||[]).reduce((row:string[], arr:Action[][])=>{
+            return arr.reduce((row:string[], item:Action[]))=>{
+                return [...row, ""];
+            },[])     
+       },[])]*/
+
+  /*     ...(node.rules || []).reduce((acc:string[], rule:Rule)=>{
+        return [...acc, ""];*/
+
+const extractWordsFromParams = (params:string="()"):string[]=>{
+    const paramobj = extractParams(params);
+    const {body={}} = paramobj;
+    const {speech=[]} = body;
+    
+    return speech.map((w:Record<string,string>) => w.words);
+  
+   
+}
+
+const extractWordsFromActions = (actions: Action[]):string[]=>{
+    return actions.reduce((acc:string[], action:Action)=>{
+        if (action.action === "say"){
+            return [...acc, ...extractWordsFromParams(action.params)]
+        }
+        return acc;
+    },[]);
+}
+
+const extractWordsFromActionsArray = (actions:Action[][]):string[]=>{
+    return (actions||[]).reduce((acc:string[], arr:Action[])=>{
+        return [...acc, ...extractWordsFromActions(arr)]
+    },[]);
+}
+
+const extractWordsFromNode = (node:Node, lookup:Record<string,string>|never[]) : (string|undefined)[]=>{
+    const onstartspeechwords  = [...(node.onstart.speech || []).map(s=>s.words)];
+    const onstartactionwords  = [...extractWordsFromActionsArray(node.onstart.actions||[])]
+    const rulewords = (node.rules || []).reduce((acc:string[], rule:Rule)=>{
+        return [...acc, ...extractWordsFromActionsArray(rule.actions)]
+    },[]);
+    return [...onstartspeechwords, ...onstartactionwords, ...rulewords];
+;}
+
+export function extractWords(passages:string[]){
+    const nodes:Node[] = passages.map(p=>convertToObject(p));
+    let lookup:Record<string,string>|never[] = [];
+
+    return nodes.reduce((acc:(string|undefined)[], node:Node)=>{
+        return [...acc, ...extractWordsFromNode(node,lookup)]
+    },[]);
+
 }
 
 export function convertToString(node:Node): string{
     return `[type:${node.type}]\n\n[onstart]\n\n${onStartFromNode(node)}\n[rules]\n${rulesFromNode(node)}`
+}
+
+export function convertToObject(text:string): Node{
+
+    const typetext = extractType(text);
+    const onstarttext = extractOnstart(text);
+    const speech = extractSpeech(onstarttext)
+    const actions = extractActions(onstarttext);
+    const rules = extractRules(extractRulesText(text));
+    
+    return {
+        type: typetext,
+        onstart : {
+            speech,
+            actions
+        },
+        rules
+    }
 }

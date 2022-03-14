@@ -41,3 +41,9 @@
 .formItem{
 	margin-bottom: 10px;
 }
+
+.description{
+	padding:7px;
+	margin-bottom:10px;
+	font-size: 0.8em;
+}

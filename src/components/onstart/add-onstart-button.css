@@ -32,7 +32,7 @@
 
 .lines >div{
 	padding:5px;
-	width: 50px;
+	width: 60px;
 }
 
 .lines .words{
@@ -41,4 +41,10 @@
 
 .lines .rate{
 	width: 30px;
+}
+
+.heading{
+	text-align: center;
+	font-weight: 700;
+	padding:10px 0px 15px 0px;
 }
