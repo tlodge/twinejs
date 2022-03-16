@@ -7,6 +7,15 @@
 
 }
 
+.rulecol{
+	display: flex;
+	flex-direction: column;
+}
+
+.rulecol input[type=text]{
+	margin: 0px;
+}
+
 #rules .next input[type=text], 
 #rules .rulerow input[type=text]{
 	margin-right: 10px;

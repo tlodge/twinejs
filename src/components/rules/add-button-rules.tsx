@@ -12,25 +12,28 @@ import './add-rules-button.css';
 export interface AddRulesProps {
 	onAdd: (rules:Rule[]) => void;
 	onCancel:()=>void;
-	rules?: Rule[],
+	type:string;
+	rules?: Rule[];
 }
 
 export interface Rule {
 	type?: string,
-    operator: string
-    operand: string
+    rule:{
+		operator: string
+    	operand: string | string[]
+	}
     actions: Action[][]
     next: string
 }
 
-export const AddRules: React.FC<AddRulesProps> = props => {
+export const AddButtonRules: React.FC<AddRulesProps> = props => {
 	const {onAdd, onCancel} = props;
 	const {t} = useTranslation();
 
-	const [rules, setRules] = React.useState<Rule[]>(props.rules || [{operator:"equals", operand:"",actions:[],next:""}]);
+	const [rules, setRules] = React.useState<Rule[]>(props.rules || [{rule:{operator:"equals", operand:""},actions:[],next:""}]);
 
 	const addNewRule = ()=>{
-		setRules([...rules,{operator:"equals", operand:"",actions:[],next:""}]);
+		setRules([...rules,{rule:{operator:"equals", operand:""},actions:[],next:""}]);
 	}
 
 	const removeAction = (actions:Action[][], index:number, subindex:number) : Action[][]=>{
@@ -142,7 +145,7 @@ export const AddRules: React.FC<AddRulesProps> = props => {
 		setRules(rules.reduce((acc:Rule[], item:Rule, i:number)=>{
 			if (i !== index)
 				return [...acc, item];
-			return [...acc, {...item, operand}];
+			return [...acc, {...item, rule:{...item.rule,operand}}];
 		},[]));
 	}
 
@@ -161,6 +164,12 @@ export const AddRules: React.FC<AddRulesProps> = props => {
 		</div>
 	}
 
+	const operandtostring  = (value: string | string[]) : string=>{
+		if (Array.isArray(value)){
+			return value.join(",")
+		}
+		return value;
+	}
 
 	const renderRule = (index:number, rule:Rule)=>{
 		
@@ -168,7 +177,7 @@ export const AddRules: React.FC<AddRulesProps> = props => {
 				<div className="rulerow">	
 					<div>when</div>
 					<div style={{marginTop:2}}>
-						<TextInput placeholder="name" style={{padding:2,width:Math.max(20,rule.operand.length * 9)}} onChange={e => setOperand(index, e.target.value)} value={rule.operand}></TextInput> 
+						<TextInput placeholder="name" style={{padding:2,width:Math.max(20,rule.rule.operand.length * 9)}} onChange={e => setOperand(index, e.target.value)} value={operandtostring(rule.rule.operand)}></TextInput> 
 					</div>
 					<div onClick={()=>{
 						addAction(0,0,{"action":""})

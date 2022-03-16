@@ -33,7 +33,7 @@ import {RenamePassageButton} from '../../components/passage/rename-passage-butto
 import './passage-edit.css';
 import { AddOnStartButton } from '../../components/onstart';
 import { AddSpeech, Speech } from '../../components/onstart/add-speech';
-import { Rule } from '../../components/rules/add-rules';
+import { Rule } from '../../components/rules/add-button-rules';
 
 import {convertToObject, convertToString} from '../../util/caravan';
 import { Action } from '../../components/onstart/add-actions';
@@ -69,7 +69,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 
 	const handleAddStart = React.useCallback((speech : Speech[], actions:Action[][])=>{
 		//get the current text and turn into a node object
-		const passageobj = convertToObject(passage.text);
+		const passageobj = convertToObject(passage.text, "speech");
 
 		//set the new text using a passage object modified with speech lines
 		const passagetext = convertToString({...passageobj, onstart:{...passageobj.onstart, speech, actions}});
@@ -141,25 +141,25 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 				/>*/}
 
 				<AddRulesButton
-					rules={convertToObject(passage.text).rules}
+					rules={convertToObject(passage.text, "speech").rules}
+					type="speech"
 					onAdd={(rules:Rule[])=>{
-					
-						const passageobj = convertToObject(passage.text);
+						console.log("seen on add", rules);
+
+						const passageobj = convertToObject(passage.text, "speech");
 						const _updated = {
 							...passageobj,
 							rules /*: [...passageobj.rules, ...rules]*/
 						}
 						
 						const passagetext = convertToString(_updated);
-						console.log(passagetext);
-						//update the passage object
 						dispatch(updatePassage(story, passage, {text: passagetext}));
 
 					}}
 				/>		
 				<AddOnStartButton
-					lines={(convertToObject(passage.text||"").onstart || {}).speech || []}
-					actions={(convertToObject(passage.text||"").onstart || {}).actions || []}
+					lines={(convertToObject(passage.text||"", "speech").onstart || {}).speech || []}
+					actions={(convertToObject(passage.text||"", "speech").onstart || {}).actions || []}
 					onAdd={handleAddStart}
 				/>
 				{/*<MenuButton

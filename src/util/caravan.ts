@@ -1,7 +1,9 @@
 import { Speech } from "../components/onstart/add-speech";
 import { Action } from "../components/onstart/add-actions";
-import { Rule } from "../components/rules/add-rules";
+import { Rule } from "../components/rules/add-button-rules";
 import { Method } from "../components/onstart/add-actions";
+import {Story} from '../store/stories';
+
 const DEFAULTRATE 	= 180;
 const DEFAULTDELAY 	= 0;
 const DEFAULTVOICE = "Daniel";
@@ -14,6 +16,13 @@ export interface Node{
         speech?:Speech[]
     }
     rules : Rule[]
+}
+
+export interface CaravanAction{
+    params: object,
+    method: any,
+    action: any,
+    delay: any,
 }
 
 const extractType = (text:string): string=>{
@@ -71,14 +80,36 @@ const extractParamsString = (str:string)=>{
     return si > -1 && ei > -1 ? toks.substring(si,ei+1) : "";
 }
 
+const formatURL = (str:string)=>{
+    if (str.startsWith("http")){
+        try {
+            return new URL(str);
+        }catch(err){
+
+        }
+    } 
+    return str;
+}
+
 const parseActionLine = (line:string) : Action=>{
     const params = extractParamsString(line);
     const toks = line.replace(params,"").replace( /[()]/g,"").replace(/["]/g,"").trim().split(',');
     if (toks.length > 0){
+        
+        let paramobj = {};
+      
+
+        const paramstr = (params||"{}").replace(/[(]/g,"{").replace(/[)]/g,"}");//.replace(/[']/g,"\"");
+        try{
+            paramobj = JSON.parse(paramstr);
+        }catch(err){
+            paramobj = {parseErr:paramstr}
+        }
+      
         return {
-            action: toks[0].startsWith("http") ? new URL(toks[0]):toks[0], 
+            action: formatURL(toks[0]), 
             delay: toks.length > 1 ? Number(toks[1].trim()) : 0, 
-            params: toks.length > 2 ? params : "",//extractParams(params) : {},
+            params: toks.length > 2 ? JSON.stringify(paramobj) : "{}",
             method: toks.length > 3 ? toks[2] === "POST" ? Method.POST : Method.GET : Method.NONE 
         }
     }
@@ -151,15 +182,16 @@ const parseRuleText = (text:string, type:string) : Rule =>{
     const [operand=""] = rtoks[0].trim().split(" ");
     const next = rtoks.length > 1 ? rtoks[1] : operand;
     return  {
-        type,
-        operator: 'equals', 
-        operand: operand.replace(/\s+/g,""),
+        rule:{
+            operator: type==="speech" ? "contains" : "equals", 
+            operand:  type==="speech"? operand.replace(/\s+/g,"").split(",") : operand.replace(/\s+/g,""),
+        },
         next: next.replace(/\s+/g,""),
         actions : extractActions((actions||"").trim())
     }
 }
 
-const extractRules = (text:string): Rule[]=>{
+const extractRules = (text:string, type:string="button"): Rule[]=>{
     const toks = text.trim().replace("[rules]","").split('\n');
     let line = 0;
     let rules: Rule[] = [];
@@ -171,7 +203,6 @@ const extractRules = (text:string): Rule[]=>{
         if (toks[line].trim().startsWith("[rule")){
             let ruletxt = "";
             const [_,_type] = toks[line].replace("[","").replace("]","").split(":");
-            const type = _type ? _type : "button";
            
             while (++line < toks.length){
                 if (!endCondition(toks[line])){
@@ -219,7 +250,7 @@ const onStartFromNode = (node:Node):string=>{
 const rulesFromNode = (node:Node):string=>{
     return node.rules.reduce((acc:string, rule:Rule)=>{
         const actionstr = (rule.actions && rule.actions.length > 0) ? `\n\t\t[actions]${actionsToString(rule.actions, '\t\t\t')}`:"";
-        return `${acc}\n\t[rule:${rule.type||""}]\n\t\t[[${rule.operand}|${rule.next}]]${actionstr}`
+        return `${acc}\n\t[rule]\n\t\t[[${rule.rule.operand}|${rule.next}]]${actionstr}`
     },"");
 }
 
@@ -281,13 +312,13 @@ export function convertToString(node:Node): string{
     return `[type:${node.type}]\n\n[onstart]\n\n${onStartFromNode(node)}\n[rules]\n${rulesFromNode(node)}`
 }
 
-export function convertToObject(text:string): Node{
+export function convertToObject(text:string, type:string="button"): Node{
 
-    const typetext = extractType(text);
+    const typetext = type;//extractType(text);
     const onstarttext = extractOnstart(text);
     const speech = extractSpeech(onstarttext)
     const actions = extractActions(onstarttext);
-    const rules = extractRules(extractRulesText(text));
+    const rules = extractRules(extractRulesText(text),type);
     
     return {
         type: typetext,
@@ -297,4 +328,123 @@ export function convertToObject(text:string): Node{
         },
         rules
     }
+}
+
+const convertToCaravanObject = (_name:string, text:string)=>{
+    const name = _name.replace(/\s+/g,"");
+    const type = extractType(text);
+    const onstarttext = extractOnstart(text); 
+    const speech = extractSpeech(onstarttext)
+    const actions = extractActions(onstarttext);
+    const rules = extractRules(extractRulesText(text),type);
+
+    const base = {
+        type,
+        name,
+        id:name,
+        subscription: type === "speech" ? "/speech" : "/press",
+        onstart : {
+            speech,
+            actions
+        },
+        rules
+    }
+    if (type==="speech"){
+        return base;
+    }
+    return {
+       ...base,
+       data: rules.map(r=>r.rule.operand),
+    }
+}
+
+
+const simplifyOnstart = (onstart:any)=>{
+    return Object.keys(onstart).reduce((acc, key)=>{
+        if (key === "speech" && onstart[key] && onstart[key].length > 0){
+            return {...acc, [key]: onstart[key]}
+        }
+        if (key === "actions" && onstart[key].length > 0 && onstart[key][0].length > 0){
+            return {...acc, [key]: onstart[key].map((a:Action[])=>simplifyActions(a))}
+        }
+        return acc;
+    },{})
+}
+
+const simplifyAction = (a:any)=>{
+    let action = {
+        action: a.action,
+        params: {},
+        method: "",
+        delay: 0,
+    };
+
+    if (a.params && Object.keys(a.params).length > 0){
+        action = {
+            ...action,
+            params: JSON.parse(a.params),
+            method: a.method,
+        }
+    }
+    if (a.delay !== undefined && a.delay > 0){
+        action = {
+            ...action,
+            delay: a.delay
+        }
+    }
+    return action;
+}
+const simplifyActions = (actions:Action[])=>{
+    return actions.map(a=>simplifyAction(a));
+}
+
+const simplifyRules = (rules:Rule[])=>{
+    return rules.reduce((acc:any, rule)=>{
+        return [...acc,{...rule, actions:rule.actions.map(a=>simplifyActions(a))}]
+    },[]);
+}
+
+const simplify = (nodes:any)=>{
+    return nodes.map((n:any)=>{
+        return Object.keys(n).reduce((acc, key)=>{
+            if (key === "onstart"){
+                return {...acc, onstart:simplifyOnstart(n.onstart)}
+            }
+            if (key === "rules"){
+                return {...acc, rules:simplifyRules(n.rules)}
+            }
+            return {...acc, [key]:n[key]}
+        },{});
+    })
+}
+
+export function convertToCaravan(story?:Story){
+    const {passages, startPassage, name} = story || {};
+   
+    const eligiblePassage = (text:string) : boolean =>{
+        return text.indexOf("[onstart]") !== -1 || text.indexOf("[actions]") !== -1 || text.indexOf("[rules]") !== -1;
+    }
+    let event = "";
+
+    const nodes = (passages||[]).reduce((acc:any, passage)=>{
+        if (passage.id === startPassage){
+            event = passage.name;
+        }    
+        if (passage.text && (passage.text.replace(/\s/g, '') !== "" && eligiblePassage(passage.text))){
+            return [...acc,convertToCaravanObject(passage.name,passage.text)]
+        }else{
+            return acc;
+        }
+    },[]);
+
+    const root = [{
+        id: name,
+        start: {
+            actions: [[]],
+            event,
+        },
+        events:simplify(nodes),
+    }];
+
+    return root;
 }
