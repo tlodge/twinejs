@@ -166,11 +166,11 @@ export const AddSpeechRules: React.FC<AddRulesProps> = props => {
 		
 		return (<div style={{padding:7, background:"#cfe4fc", borderRadius:5, marginBottom:5}}>
 				<div className="rulecol">	
-					<div>when any of the following words are said</div>
+					<div>If any of the following words are spoken</div>
 					<div style={{marginTop:7, marginBottom:7}}>
 						<TextInput placeholder="name" style={{padding:2,width:300}} onChange={e => setOperand(index, e.target.value)} value={operandtostring(rule.rule.operand)}></TextInput> 
 					</div>
-					<div onClick={()=>{addAction(0,0,{"action":""})}}>call {rule.actions.length <= 0 ? "nothing" : ""} </div>
+					<div style={{marginBottom:7}}>call  <span className="link" onClick={()=>{addAction(0,0,{"action":""})}}>{rule.actions.length <= 0 ? "nothing" : ""}</span> </div>
 				</div>
 				
 				{rule.actions.length > 0 && <Actions actions={rule.actions} 

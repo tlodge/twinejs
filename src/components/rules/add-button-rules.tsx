@@ -173,7 +173,7 @@ export const AddButtonRules: React.FC<AddRulesProps> = props => {
 
 	const renderRule = (index:number, rule:Rule)=>{
 		
-		return (<div style={{padding:7, background:"#cfe4fc", borderRadius:5, marginBottom:5}}>
+		return (<div key={index} style={{padding:7, background:"#cfe4fc", borderRadius:5, marginBottom:5}}>
 				<div className="rulerow">	
 					<div>when</div>
 					<div style={{marginTop:2}}>

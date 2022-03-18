@@ -7,10 +7,33 @@ import {DeleteStoryButton} from './delete-story-button';
 import {DuplicateStoryButton} from './duplicate-story-button';
 import {EditStoryButton} from './edit-story-button';
 import {TagStoryButton} from './tag-story-button';
+import {ExportStoriesButton} from './export-stories-button';
+import { convertToCaravan } from '../../../../util/caravan';
 
 export interface StoryActionsProps {
 	selectedStory?: Story;
 }
+const exportData = (stories:Story[]) => {
+	let name = "";
+
+	const _stories = stories.reduce((acc:any,s)=>{
+		name = `${name}_${(s.name || "not").substring(0,3)}`;
+		const arr = convertToCaravan(s);
+		if (arr.length > 0){
+			return [...acc, arr[0]]
+		}
+		return acc;
+	},[])
+
+	
+    const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
+      JSON.stringify(_stories,null,4)
+    )}`;
+    const link = document.createElement("a");
+    link.href = jsonString;
+    link.download = `${name}.json`;
+    link.click();
+};
 
 export const StoryActions: React.FC<StoryActionsProps> = props => {
 	const {selectedStory} = props;
@@ -30,6 +53,7 @@ export const StoryActions: React.FC<StoryActionsProps> = props => {
 			/>
 			<DuplicateStoryButton story={selectedStory} />
 			<DeleteStoryButton story={selectedStory} />
+			<ExportStoriesButton onSelect={(stories:Story[])=>{exportData(stories)}}/>
 		</ButtonBar>
 	);
 };

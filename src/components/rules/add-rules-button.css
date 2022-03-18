@@ -30,6 +30,12 @@
 	color: #325EA5;
 }
 
+.link{
+	color: #325EA5;
+	font-weight: 700;
+	cursor:pointer;
+}
+
 #rules .add-dialogue{
 	position: absolute;
 	top:14px;

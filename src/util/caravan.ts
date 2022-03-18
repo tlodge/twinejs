@@ -74,9 +74,11 @@ const extractParams = (tuplestr:string="()") : Record<string,any>=>{
 }
 
 const extractParamsString = (str:string)=>{
+    console.log("extracting param string", str);
     const toks = str.trim().substring(1, str.trim().length-1);
-    const si = toks.indexOf("(");
-    const ei = toks.lastIndexOf(")");
+    console.log("toks are", toks);
+    const si = toks.indexOf("{");
+    const ei = toks.lastIndexOf("}");
     return si > -1 && ei > -1 ? toks.substring(si,ei+1) : "";
 }
 
@@ -92,14 +94,20 @@ const formatURL = (str:string)=>{
 }
 
 const parseActionLine = (line:string) : Action=>{
+    console.log("parsing action line!", line);
+
     const params = extractParamsString(line);
     const toks = line.replace(params,"").replace( /[()]/g,"").replace(/["]/g,"").trim().split(',');
+    console.log("toks are", toks);
+
     if (toks.length > 0){
         
         let paramobj = {};
       
 
         const paramstr = (params||"{}").replace(/[(]/g,"{").replace(/[)]/g,"}");//.replace(/[']/g,"\"");
+        console.log("paramstr is", paramstr);
+
         try{
             paramobj = JSON.parse(paramstr);
         }catch(err){
@@ -176,7 +184,7 @@ const extractActions = (text:string) : (Action)[][] =>{
 
 const parseRuleText = (text:string, type:string) : Rule =>{
     const [r, actions] = text.split('[actions]');
-
+    
     
     const rtoks = r.replace("[[","").replace("]]","").split("|");
     const [operand=""] = rtoks[0].trim().split(" ");
@@ -184,7 +192,7 @@ const parseRuleText = (text:string, type:string) : Rule =>{
     return  {
         rule:{
             operator: type==="speech" ? "contains" : "equals", 
-            operand:  type==="speech"? operand.replace(/\s+/g,"").split(",") : operand.replace(/\s+/g,""),
+            operand:  type==="speech"? operand.replace(/\s+/g,"").split(",").filter(t=>t.trim()!=="") : operand.replace(/\s+/g,""),
         },
         next: next.replace(/\s+/g,""),
         actions : extractActions((actions||"").trim())
@@ -312,16 +320,16 @@ export function convertToString(node:Node): string{
     return `[type:${node.type}]\n\n[onstart]\n\n${onStartFromNode(node)}\n[rules]\n${rulesFromNode(node)}`
 }
 
-export function convertToObject(text:string, type:string="button"): Node{
+export function convertToObject(text:string): Node{
 
-    const typetext = type;//extractType(text);
+    const type = extractType(text);
     const onstarttext = extractOnstart(text);
     const speech = extractSpeech(onstarttext)
     const actions = extractActions(onstarttext);
     const rules = extractRules(extractRulesText(text),type);
     
     return {
-        type: typetext,
+        type,
         onstart : {
             speech,
             actions

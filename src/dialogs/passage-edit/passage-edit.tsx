@@ -11,7 +11,7 @@ import {CheckboxButton} from '../../components/control/checkbox-button';
 import {MenuButton} from '../../components/control/menu-button';
 import {AddTagButton, TagButton} from '../../components/tag';
 import { AddRulesButton } from '../../components/rules/add-rules-button';
-
+import { ChooseTypeButton } from '../../components/choosetype/choose-type-button';
 import {
 	formatWithNameAndVersion,
 	useStoryFormatsContext
@@ -37,6 +37,7 @@ import { Rule } from '../../components/rules/add-button-rules';
 
 import {convertToObject, convertToString} from '../../util/caravan';
 import { Action } from '../../components/onstart/add-actions';
+import { TextSelect } from '../../components/control/text-select';
 
 
 export interface PassageEditDialogProps
@@ -69,7 +70,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 
 	const handleAddStart = React.useCallback((speech : Speech[], actions:Action[][])=>{
 		//get the current text and turn into a node object
-		const passageobj = convertToObject(passage.text, "speech");
+		const passageobj = convertToObject(passage.text);
 
 		//set the new text using a passage object modified with speech lines
 		const passagetext = convertToString({...passageobj, onstart:{...passageobj.onstart, speech, actions}});
@@ -125,6 +126,8 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 	}
 
 	const isStart = story.startPassage === passage.id;
+	const node = convertToObject(passage.text);
+	console.log("node is", node);
 
 	return (
 		<DialogCard
@@ -139,14 +142,22 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 					existingTags={storyPassageTags(story)}
 					onAdd={handleAddTag}
 				/>*/}
+				
+				
+				<ChooseTypeButton type={node.type} onSelect={(e)=>{
+					const _node = {
+						...node,
+						type:e,
+					}
+					const passagetext = convertToString(_node);
+					dispatch(updatePassage(story, passage, {text: passagetext}));
+				}}/>
 
 				<AddRulesButton
-					rules={convertToObject(passage.text, "speech").rules}
-					type="speech"
+					rules={convertToObject(passage.text).rules}
+					type={node.type}
 					onAdd={(rules:Rule[])=>{
-						console.log("seen on add", rules);
-
-						const passageobj = convertToObject(passage.text, "speech");
+						const passageobj = {...convertToObject(passage.text), type:"speech"}
 						const _updated = {
 							...passageobj,
 							rules /*: [...passageobj.rules, ...rules]*/
@@ -158,8 +169,8 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 					}}
 				/>		
 				<AddOnStartButton
-					lines={(convertToObject(passage.text||"", "speech").onstart || {}).speech || []}
-					actions={(convertToObject(passage.text||"", "speech").onstart || {}).actions || []}
+					lines={(convertToObject(passage.text||"").onstart || {}).speech || []}
+					actions={(convertToObject(passage.text||"").onstart || {}).actions || []}
 					onAdd={handleAddStart}
 				/>
 				{/*<MenuButton

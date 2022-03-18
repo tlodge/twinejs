@@ -64,7 +64,7 @@ export const Actions: React.FC<ActionsProps> = props => {
         const lines = actions.map((arr, aindex)=>{
             
             const rows =  arr.map(((action,subindex)=>{
-                return <div style={{padding:7}}>
+                return <div key={`${aindex}-${subindex}`} style={{padding:7}}>
                     <div style={{display:"flex", flexDirection:"row", alignItems:"center"}}>
                         <div style={{display: "flex", flex: "1 1 auto", flexDirection:"column"}}>
                             <div style={{padding:4,display:"flex", flexDirection:"column"}}>
@@ -82,7 +82,7 @@ export const Actions: React.FC<ActionsProps> = props => {
                     </div>
                 </div>
             }))					
-            return <div style={{borderLeft:"2px solid black", marginBottom:10}}>
+            return <div key={aindex} style={{borderLeft:"2px solid black", marginBottom:10}}>
                 {rows}
             </div>
         })
