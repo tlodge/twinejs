@@ -54,7 +54,10 @@ const extractRulesText = (text:string) : string=>{
 }
 
 const parseSpeechLine = (line:string) : Speech =>{
-    const tokens = line.replace("[speech]","").replace( /[()]/g,"").replace(/["]/g,"").trim().split(',');
+    //temporarily replace any commas in speech with special symbol
+    var commasreplaced = line.replace(/"[^"]+"/g, v=>v.replace(/,/g, '#'));
+    const tokens = commasreplaced.replace("[speech]","").replace( /[()]/g,"").replace(/["]/g,"").trim().split(',').map(l=>l.replaceAll("#",","));
+    
     return {
         words:tokens.length > 0 ? tokens[0].trim(): "", 
         voice:tokens.length > 1 ? tokens[1].trim(): `${DEFAULTVOICE}`,
