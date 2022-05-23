@@ -19,7 +19,10 @@ export const ChooseTypeButton: React.FC<ChooseTypeButtonProps> = props => {
 	const {t} = useTranslation();
 
 	let validationMessage: string | undefined = undefined;
-
+	
+	React.useEffect(()=>{
+		onSelect(type || "button")
+	},[])
 	return (
 		<span className="add-tag-button">
 			<CardButton

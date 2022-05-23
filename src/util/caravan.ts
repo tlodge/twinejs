@@ -195,9 +195,10 @@ const parseRuleText = (text:string, type:string) : Rule =>{
     return  {
         rule:{
             operator: type==="speech" ? "contains" : "equals", 
+            //operand:  type==="speech"? operand.split(",").filter(t=>t.trim()!=="") : operand,
             operand:  type==="speech"? operand.replace(/\s+/g,"").split(",").filter(t=>t.trim()!=="") : operand.replace(/\s+/g,""),
         },
-        next: next.replace(/\s+/g,""),
+        next: next,//.replace(/\s+/g,""),
         actions : extractActions((actions||"").trim())
     }
 }
@@ -439,7 +440,7 @@ export function convertToCaravan(story?:Story){
 
     const nodes = (passages||[]).reduce((acc:any, passage)=>{
         if (passage.id === startPassage){
-            event = passage.name;
+            event = passage.name.replace(/\s/g, '');
         }    
         if (passage.text && (passage.text.replace(/\s/g, '') !== "" && eligiblePassage(passage.text))){
             return [...acc,convertToCaravanObject(passage.name,passage.text)]
