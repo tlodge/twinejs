@@ -1,6 +1,7 @@
 import { IconCheck, IconTrashX } from '@tabler/icons';
 import * as React from 'react';
 import {useTranslation} from 'react-i18next';
+import { ColorSelect } from '../control/color-select';
 import { IconButton } from '../control/icon-button';
 import {TextInput} from '../control/text-input';
 import { TextSelect } from '../control/text-select';
@@ -37,7 +38,7 @@ const actions = [
     {name: "smell left on", id: "smell-left-on", url:"http://[smell-left]/on3", method:Method.GET, params:"{}", description:"This will start the left hand side smell actuator"},
     {name: "smell left off", id: "smell-left-off", url:"http://[smell-left]/off", method:Method.GET, params:"{}", description:"This will turn off the left hand side smell actuator"},
     {name: "nanoleaf", id:"nanoleaf", url:"http://[lenovo]:9104/ui/api", method:Method.GET,params:`{"query":{"hue":203,"sat":91,"brightness":99}}`, description:"This will set the colours of the nanoleaf lights (under the caravan seat)"},
-    {name: "hue", id: "hueoff", method:Method.GET,url:"http://[lenovo]:9092/ui/api/off",  params:"{}", description:"This will turn the hue lights off"},
+    {name: "hue", id: "huecolour", method:Method.GET,url:"http://[lenovo]:9092/ui/api/hex",  params:`{"query":{"hex":"ff0000"}}`, description:"This will change the hue lights colour"},
     {name: "huescript", id: "huescript", method:Method.GET,url:"http://[lenovo]:9092/ui/api/light_script",  params:`{"query":{"script_id":"alightscript"}}`, description:"This will run a pre-authored script that sets the hue light's colours (the strip above the screen)"},
     {name: "togglewindows", id: "togglewindows", method:Method.GET,url:"http://[windows]:9222/H",  params:"{}", description:"This will toggle the opacity of the caravan windows"},
     {name: "printline", id: "printline", method:Method.POST, url:"http://[receipt]:8080/print", params:`{"body":{"text":"a line of text"}}`, description:"This will print a line of text on the label printer"},
@@ -134,7 +135,21 @@ export const AddAction: React.FC<AddActionProps> = props => {
         },"")
     }
 
-	return (<div className="add-dialogue">
+    const renderParams = ()=>{
+        if (selectedActionProfile === "huecolour"){
+            const params = JSON.parse(_action.params || "{}");
+            const {query={}} = params;
+            const {hex="ff0000"} = query;
+
+            return <> 
+                <input type="color" id="favcolor" name="favcolor" value={`#${hex}`} onChange={(e)=>{setParams(JSON.stringify({query:{hex:e.target.value.replace("#","")}}))}}/>
+            </>
+        }else{
+            return <TextInput onChange={e => setParams(e.target.value)} helptext={`as a tuple e.g ('greeting':('hello':'world))`} value={_action.params||""}>params</TextInput>
+        }
+    }
+
+    return (<div className="add-dialogue">
                 <div className="heading">add action</div>
                 <div className="formItem">
                     <TextSelect onChange={handleActionChange} options={actions.map(a => ({ label: a.name, value: a.id }))} value={selectedActionProfile}>{"action profiles"}</TextSelect>
@@ -154,10 +169,10 @@ export const AddAction: React.FC<AddActionProps> = props => {
                     </TextSelect>
                 </div>
                 <div className="formItem">
-                    <TextInput onChange={e => setParams(e.target.value)} helptext={`as a tuple e.g ('greeting':('hello':'world))`} value={_action.params||""}>params</TextInput>
+                    {renderParams()}
                 </div>
                 <div className="formItem">
-                    <TextInput style={{width:60}} onChange={e => setDelay(e.target.value)} helptext={`pause in seconds after successful call`} value={`${_action.delay||0}`}>delay</TextInput>
+                    <TextInput style={{width:60}} onChange={e => setDelay(e.target.value)} helptext={`pause in seconds before action`} value={`${_action.delay||0}`}>delay</TextInput>
                 </div>
                 <div style={{textAlign:"center"}}>
                 <IconButton icon={<IconCheck />} iconOnly={true} label={""} onClick={()=>onAdd(_format(_action))} variant="primary"/> 
