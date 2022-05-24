@@ -343,7 +343,7 @@ export function convertToObject(text:string): Node{
 }
 
 const convertToCaravanObject = (_name:string, text:string)=>{
-    const name = _name.replace(/\s+/g,"");
+    const name = _name;//.replace(/\s+/g,"");
     const type = extractType(text);
     const onstarttext = extractOnstart(text); 
     const speech = extractSpeech(onstarttext)
