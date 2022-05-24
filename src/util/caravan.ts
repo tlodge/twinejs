@@ -440,7 +440,7 @@ export function convertToCaravan(story?:Story){
 
     const nodes = (passages||[]).reduce((acc:any, passage)=>{
         if (passage.id === startPassage){
-            event = passage.name.replace(/\s/g, '');
+            event = passage.name;//.replace(/\s/g, '');
         }    
         if (passage.text && (passage.text.replace(/\s/g, '') !== "" && eligiblePassage(passage.text))){
             return [...acc,convertToCaravanObject(passage.name,passage.text)]
