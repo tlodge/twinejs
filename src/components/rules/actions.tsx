@@ -67,12 +67,13 @@ export const Actions: React.FC<ActionsProps> = props => {
                 return <div key={`${aindex}-${subindex}`} style={{padding:7}}>
                     <div style={{display:"flex", flexDirection:"row", alignItems:"center"}}>
                         <div style={{display: "flex", flex: "1 1 auto", flexDirection:"column"}}>
+                            <div style={{padding:4,display:"flex", flexDirection:"row"}}>
+                                <div style={{flex: "1 1 auto", fontSize:"0.9em"}}>after waiting {action.delay} ms, call</div> 
+                            </div>
                             <div style={{padding:4,display:"flex", flexDirection:"column"}}>
                                 <div style={{flex: "1 1 auto", fontSize:"0.9em", fontWeight:700}}>{action.action.toString()}</div> 
                             </div>
-                            <div style={{padding:4,display:"flex", flexDirection:"row"}}>
-                                <div style={{flex: "1 1 auto", fontSize:"0.9em"}}>then wait {action.delay} s</div> 
-                            </div>
+                            
                         </div>	
                         <div style={{display:"flex", flexDirection:"row"}}>
                             <IconButton icon={<IconEdit />} iconOnly={true} label={""} onClick={()=>onEdit(aindex,subindex)} variant="primary"/>
