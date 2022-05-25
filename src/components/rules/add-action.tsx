@@ -55,9 +55,9 @@ const actions = [
 
 export const AddAction: React.FC<AddActionProps> = props => {
 	const {onAdd,onClose,action} = props;
-    
+    console.log("am in hete with action", action, props);
 	const [_action, _setAction] = React.useState<Action>(action);
-    const [selectedActionProfile, setSelectedActionProfile] = React.useState("arm-expand");
+    const [selectedActionProfile, setSelectedActionProfile] = React.useState("raw");
 	const {t} = useTranslation();
 
 	const handleMethodChange = (event: React.ChangeEvent<HTMLSelectElement>)=>{
@@ -135,17 +135,107 @@ export const AddAction: React.FC<AddActionProps> = props => {
         },"")
     }
 
-    const renderParams = ()=>{
-        if (selectedActionProfile === "huecolour"){
-            const params = JSON.parse(_action.params || "{}");
-            const {query={}} = params;
-            const {hex="ff0000"} = query;
+    const _hueparams = ()=>{
+        const params = JSON.parse(_action.params || "{}");
+        const {query={}} = params;
+        const {hex="ff0000"} = query;
+        return <> 
+            <input type="color" id="favcolor" name="favcolor" value={`#${hex}`} onChange={(e)=>{setParams(JSON.stringify({query:{hex:e.target.value.replace("#","")}}))}}/>
+        </>
+    }
 
-            return <> 
-                <input type="color" id="favcolor" name="favcolor" value={`#${hex}`} onChange={(e)=>{setParams(JSON.stringify({query:{hex:e.target.value.replace("#","")}}))}}/>
-            </>
-        }else{
-            return <TextInput onChange={e => setParams(e.target.value)} helptext={`as a tuple e.g ('greeting':('hello':'world))`} value={_action.params||""}>params</TextInput>
+    const _rawparams = ()=>{
+        return <TextInput onChange={e => setParams(e.target.value)} helptext={`as a json object e.g {'greeting':{'hello':'world'}}`} value={_action.params||""}>params</TextInput>
+    }
+
+    const _messageparams = ()=>{
+        const params = JSON.parse(_action.params || "{}");
+        const {query={}} = params;
+        const {message="a message"} = query;
+        return <TextInput onChange={e => setParams(JSON.stringify({query:{message:e.target.value}}))} helptext={`the message you want to display`} value={message}>message</TextInput>
+    }
+
+    //{"body":{"text":"a line of text"}}
+    const _printerparams = ()=>{
+        const params = JSON.parse(_action.params || "{}");
+        const {body={}} = params;
+        const {text="a line to print"} = body;
+        return <TextInput onChange={e => setParams(JSON.stringify({body:{text:e.target.value}}))} helptext={`the message you want to display`} value={text}>line to print</TextInput>
+    }
+
+    const _fanparams = ()=>{
+        const params = JSON.parse(_action.params || "{}");
+        const {query={}} = params;
+        const {rotate=true, power=10, cool=true, from=0, to=90} = query;
+        
+        const _handleRotateChange = (e:React.ChangeEvent<HTMLSelectElement>)=>{
+            setParams(JSON.stringify({query:{rotate:e.target.value==="true" ? true : false, power, cool, from, to}}));
+        }
+
+        const _handlePowerChange = (e:React.ChangeEvent<HTMLSelectElement>)=>{
+            setParams(JSON.stringify({query:{rotate, power:Number(e.target.value), cool, from, to}}));
+        }
+
+        const _handleTempChange = (e:React.ChangeEvent<HTMLSelectElement>)=>{
+            setParams(JSON.stringify({query:{rotate, cool:e.target.value==="true" ? true : false, power, from, to}}));
+        }
+
+        const _handleFromChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
+            if (!isNaN(Number(e.target.value))){
+                setParams(JSON.stringify({query:{rotate, cool, power, from:Number(e.target.value), to}}));
+            }
+        }
+
+        const _handleToChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
+            if (!isNaN(Number(e.target.value))){
+                setParams(JSON.stringify({query:{rotate, cool, power, to:Number(e.target.value), from}}));
+            }
+        }
+
+        const powerlabels = [0,1,2,3,4,5,6,7,8,9,10].map(i=>({label:`${i}`, value:`${i}`}))
+
+
+        return <div style={{display:"flex", flexDirection:"column"}}>
+             <TextSelect onChange={_handleRotateChange}  options={[{label:"true", value:"true"}, {label:"false", value:"false"}]} value={rotate ? "true": "false"}>rotate</TextSelect>
+             <TextSelect onChange={_handlePowerChange}  options={powerlabels} value={power}>power</TextSelect>
+             <TextSelect onChange={_handleTempChange} options={[{label:"true", value:"true"}, {label:"false", value:"false"}]} value={cool ? "true": "false"}>cool</TextSelect>
+             <TextInput onChange={_handleFromChange} helptext={`rotation from (deg)`} value={from}>rotation from</TextInput>
+             <TextInput onChange={_handleToChange} helptext={`rotation to (deg)`} value={to}>rotation to</TextInput>
+        </div>
+    }
+
+    const renderParams = ()=>{
+        switch (selectedActionProfile){
+            case "huecolor":
+                return _hueparams();
+            case "raw":
+                return _rawparams();
+            case "message": // message on screen!
+                return _messageparams();
+            case "printline": // send to label printer
+                return _printerparams();
+            case "fan":
+                return _fanparams();
+            default:
+                return;
+
+        }
+    }
+
+    const renderMethod = ()=>{
+        if (selectedActionProfile == "raw"){
+            return <TextSelect onChange={handleMethodChange} options={[
+                {disabled:false, label:"GET", value:Method.GET},
+                {disabled:false, label:"POST", value:Method.POST}
+                ]} value={_action.method === Method.POST ? Method.POST : Method.GET}>
+                {"method"}
+            </TextSelect>
+        }
+    }
+
+    const renderURL = ()=>{
+        if (selectedActionProfile === "raw"){
+            return <TextInput onChange={e => setAction(e.target.value)} value={_action.action.toString()} helptext={'a url or a tag!'}>url</TextInput>
         }
     }
 
@@ -158,15 +248,10 @@ export const AddAction: React.FC<AddActionProps> = props => {
                     {description()}
                 </div>
                 <div className="formItem">
-                    <TextInput onChange={e => setAction(e.target.value)} value={_action.action.toString()} helptext={'a url or a tag!'}>url</TextInput>
+                    {renderURL()}
                 </div>
                 <div className="formItem">
-                    <TextSelect onChange={handleMethodChange} options={[
-                        {disabled:false, label:"GET", value:Method.GET},
-                        {disabled:false, label:"POST", value:Method.POST}
-                        ]} value={_action.method === Method.POST ? Method.POST : Method.GET}>
-                        {"method"}
-                    </TextSelect>
+                    {renderMethod()}
                 </div>
                 <div className="formItem">
                     {renderParams()}

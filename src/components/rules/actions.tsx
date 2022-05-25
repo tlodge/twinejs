@@ -45,6 +45,7 @@ export const Actions: React.FC<ActionsProps> = props => {
     }
 
     const addAction = (aindex:number, action:Action)=>{
+        console.log("Adding action", action);
         close();
         props.addAction(aindex,action)
     }

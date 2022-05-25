@@ -156,6 +156,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 				<AddRulesButton
 					rules={convertToObject(passage.text).rules}
 					type={node.type}
+					label="rules"
 					onAdd={(rules:Rule[])=>{
 						const passageobj = {...convertToObject(passage.text), type:"speech"}
 						const _updated = {
