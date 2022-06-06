@@ -1,11 +1,11 @@
 import { IconCheck, IconTrashX } from '@tabler/icons';
 import * as React from 'react';
 import {useTranslation} from 'react-i18next';
-import { ColorSelect } from '../control/color-select';
 import { IconButton } from '../control/icon-button';
 import {TextInput} from '../control/text-input';
 import { TextSelect } from '../control/text-select';
 import { Action, Method } from '../onstart/add-actions';
+import { AddSpeech } from '../onstart/add-speech';
 
 import './add-rules-button.css';
 
@@ -53,11 +53,20 @@ const actions = [
     /*{name: "mini screen", id:"mini-screen", method:Method.GET, url:"http://[lenovo]:9107/api/update", params:`{"query":{"html":"<img src='https://via.placeholder.com/150'>"}}`, description:"This will send arbitrary HTML to the caravan's mini screens"},*/
 ]
 
+const _lookupaction = (action:Action)=>{
+    console.log("looking up action", action);
+    const url = (action.action || "").toString();
+    const idx = actions.map(a=>a.url).indexOf(url);
+    return idx === -1 ? "raw" : actions[idx].id;
+}
+
 export const AddAction: React.FC<AddActionProps> = props => {
 	const {onAdd,onClose,action} = props;
-    console.log("am in hete with action", action, props);
+    
+    console.log("am in here with action", action);
+
 	const [_action, _setAction] = React.useState<Action>(action);
-    const [selectedActionProfile, setSelectedActionProfile] = React.useState("raw");
+    const [selectedActionProfile, setSelectedActionProfile] = React.useState(_lookupaction(action));
 	const {t} = useTranslation();
 
 	const handleMethodChange = (event: React.ChangeEvent<HTMLSelectElement>)=>{
@@ -136,11 +145,13 @@ export const AddAction: React.FC<AddActionProps> = props => {
     }
 
     const _hueparams = ()=>{
-        const params = JSON.parse(_action.params || "{}");
+       
+        const params = JSON.parse(action.params || "{}");
         const {query={}} = params;
         const {hex="ff0000"} = query;
         return <> 
             <input type="color" id="favcolor" name="favcolor" value={`#${hex}`} onChange={(e)=>{setParams(JSON.stringify({query:{hex:e.target.value.replace("#","")}}))}}/>
+            <p className="description">select a colour for the lights</p>
         </>
     }
 
@@ -149,7 +160,7 @@ export const AddAction: React.FC<AddActionProps> = props => {
     }
 
     const _messageparams = ()=>{
-        const params = JSON.parse(_action.params || "{}");
+        const params = JSON.parse(action.params || "{}");
         const {query={}} = params;
         const {message="a message"} = query;
         return <TextInput onChange={e => setParams(JSON.stringify({query:{message:e.target.value}}))} helptext={`the message you want to display`} value={message}>message</TextInput>
@@ -157,11 +168,21 @@ export const AddAction: React.FC<AddActionProps> = props => {
 
     //{"body":{"text":"a line of text"}}
     const _printerparams = ()=>{
-        const params = JSON.parse(_action.params || "{}");
+        const params = JSON.parse(action.params || "{}");
         const {body={}} = params;
         const {text="a line to print"} = body;
         return <TextInput onChange={e => setParams(JSON.stringify({body:{text:e.target.value}}))} helptext={`the message you want to display`} value={text}>line to print</TextInput>
     }
+
+    const _speechparams = ()=>{
+        
+        //FIX!!
+        const params = JSON.parse(_action.params || "{}");
+        const {body={}} = params;
+        const {speech=[]} = body;
+        return <AddSpeech lines={speech} onAdd={(lines)=>{setParams(JSON.stringify({body:{speech:lines}}))}}/>
+    }
+
 
     const _fanparams = ()=>{
         const params = JSON.parse(_action.params || "{}");
@@ -195,18 +216,29 @@ export const AddAction: React.FC<AddActionProps> = props => {
         const powerlabels = [0,1,2,3,4,5,6,7,8,9,10].map(i=>({label:`${i}`, value:`${i}`}))
 
 
-        return <div style={{display:"flex", flexDirection:"column"}}>
-             <TextSelect onChange={_handleRotateChange}  options={[{label:"true", value:"true"}, {label:"false", value:"false"}]} value={rotate ? "true": "false"}>rotate</TextSelect>
-             <TextSelect onChange={_handlePowerChange}  options={powerlabels} value={power}>power</TextSelect>
-             <TextSelect onChange={_handleTempChange} options={[{label:"true", value:"true"}, {label:"false", value:"false"}]} value={cool ? "true": "false"}>cool</TextSelect>
-             <TextInput onChange={_handleFromChange} helptext={`rotation from (deg)`} value={from}>rotation from</TextInput>
-             <TextInput onChange={_handleToChange} helptext={`rotation to (deg)`} value={to}>rotation to</TextInput>
-        </div>
+        return  <div style={{display:"flex", flexDirection:"column"}}>
+                    <div className="formItem">
+                        <TextSelect onChange={_handleRotateChange}  options={[{label:"true", value:"true"}, {label:"false", value:"false"}]} value={rotate ? "true": "false"}>rotate</TextSelect>
+                    </div>
+                    <div className="formItem">
+                        <TextSelect onChange={_handlePowerChange}  options={powerlabels} value={power}>power</TextSelect>
+                    </div>
+                    <div className="formItem">
+                        <TextSelect onChange={_handleTempChange} options={[{label:"true", value:"true"}, {label:"false", value:"false"}]} value={cool ? "true": "false"}>cool</TextSelect>
+                    </div>
+                    <div className="formItem">
+                        <TextInput onChange={_handleFromChange} helptext={`rotation from (deg)`} value={from}>rotation from</TextInput>
+                    </div>
+                    <div className="formItem">
+                        <TextInput onChange={_handleToChange} helptext={`rotation to (deg)`} value={to}>rotation to</TextInput>
+                    </div>
+                </div>
     }
 
     const renderParams = ()=>{
+       
         switch (selectedActionProfile){
-            case "huecolor":
+            case "huecolour":
                 return _hueparams();
             case "raw":
                 return _rawparams();
@@ -216,6 +248,8 @@ export const AddAction: React.FC<AddActionProps> = props => {
                 return _printerparams();
             case "fan":
                 return _fanparams();
+            case "speech":    
+                return _speechparams();
             default:
                 return;
 
@@ -257,7 +291,7 @@ export const AddAction: React.FC<AddActionProps> = props => {
                     {renderParams()}
                 </div>
                 <div className="formItem">
-                    <TextInput style={{width:60}} onChange={e => setDelay(e.target.value)} helptext={`pause in ms BEFORE action`} value={`${_action.delay||0}`}>delay</TextInput>
+                    <TextInput style={{width:60}} onChange={e => setDelay(e.target.value)} helptext={`pause in ms BEFORE action fires`} value={`${_action.delay||0}`}>delay</TextInput>
                 </div>
                 <div style={{textAlign:"center"}}>
                 <IconButton icon={<IconCheck />} iconOnly={true} label={""} onClick={()=>onAdd(_format(_action))} variant="primary"/> 

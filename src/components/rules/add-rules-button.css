@@ -30,6 +30,15 @@
 	color: #325EA5;
 }
 
+.container{
+	padding:10px;
+}
+.help{
+	font-size: 0.8em;
+	
+	line-height:1.5em;
+}
+
 .link{
 	color: #325EA5;
 	font-weight: 700;
@@ -58,7 +67,8 @@
 }
 
 .description{
-	padding:7px;
+	padding: 7px 0px 7px 0px;
 	margin-bottom:10px;
 	font-size: 0.8em;
+	line-height:1.5em;
 }

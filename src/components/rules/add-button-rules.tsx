@@ -173,7 +173,7 @@ export const AddButtonRules: React.FC<AddRulesProps> = props => {
 
 	const renderRule = (index:number, rule:Rule)=>{
 		
-		return (<div key={index} style={{padding:7, background:"#cfe4fc", borderRadius:5, marginBottom:5}}>
+		return (<div key={index}>
 				<div className="rulerow">	
 					<div>when</div>
 					<div style={{marginTop:2}}>
@@ -207,7 +207,7 @@ export const AddButtonRules: React.FC<AddRulesProps> = props => {
 					<IconButton icon={<IconPlus />} iconOnly={false} label={"add another rule"} onClick={addNewRule} variant="primary"/>
 				</div>
 			</div>
-			<div style={{position:"fixed", display:"flex", justifyContent:"center", width:370, bottom:0, background:"white"}}>
+			<div style={{display:"flex", justifyContent:"center"}}>
 				<ButtonBar>
 					<IconButton
 						disabled={false}

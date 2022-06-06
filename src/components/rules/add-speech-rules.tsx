@@ -164,13 +164,12 @@ export const AddSpeechRules: React.FC<AddRulesProps> = props => {
 
 	const renderRule = (index:number, rule:Rule)=>{
 		
-		return (<div style={{padding:7, background:"#cfe4fc", borderRadius:5, marginBottom:5}}>
-				<div className="rulecol">	
+		return (<><div className="rulecol">	
 					<div>If any of the following words are spoken</div>
-					<div style={{marginTop:7, marginBottom:7}}>
+					<div style={{marginTop:15, marginBottom:7}}>
 						<TextInput placeholder="name" style={{padding:2,width:300}} onChange={e => setOperand(index, e.target.value)} value={operandtostring(rule.rule.operand)}></TextInput> 
 					</div>
-					<div style={{marginBottom:7}}>call  <span className="link" onClick={()=>{addAction(0,0,{"action":""})}}>{rule.actions.length <= 0 ? "nothing" : ""}</span> </div>
+					<div style={{marginBottom:15, marginTop:7}}>call  <span className="link" onClick={()=>{addAction(0,0,{"action":""})}}>{rule.actions.length <= 0 ? "nothing" : ""}</span> </div>
 				</div>
 				
 				{rule.actions.length > 0 && <Actions actions={rule.actions} 
@@ -180,7 +179,7 @@ export const AddSpeechRules: React.FC<AddRulesProps> = props => {
 						 addParallelAction={()=>addParallelAction(index)}/>}
 				
 				{renderNext(index,rule.next||"")}
-			</div>)
+			</>)
 	}
 
 	const renderRules = ()=>{
@@ -190,13 +189,13 @@ export const AddSpeechRules: React.FC<AddRulesProps> = props => {
 	}
 
 	return (<>
-			<div id="speechrules" style={{marginBottom:40}}>		
+			<div id="speechrules" style={{marginBottom:10}}>		
 				{renderRules()}
 				<div style={{textAlign:"center"}}>
 					<IconButton icon={<IconPlus />} iconOnly={false} label={"add another rule"} onClick={addNewRule} variant="primary"/>
 				</div>
 			</div>
-			<div style={{position:"fixed", display:"flex", justifyContent:"center", width:370, bottom:0, background:"white"}}>
+			<div style={{ display:"flex", justifyContent:"center"}}>
 				<ButtonBar>
 					<IconButton
 						disabled={false}

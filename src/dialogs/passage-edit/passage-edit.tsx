@@ -127,7 +127,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 
 	const isStart = story.startPassage === passage.id;
 	const node = convertToObject(passage.text);
-	console.log("node is", node);
+
 
 	return (
 		<DialogCard
@@ -144,14 +144,14 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 				/>*/}
 				
 				
-				<ChooseTypeButton type={node.type} onSelect={(e)=>{
+				{/*<ChooseTypeButton type={node.type} onSelect={(e)=>{
 					const _node = {
 						...node,
 						type:e,
 					}
 					const passagetext = convertToString(_node);
 					dispatch(updatePassage(story, passage, {text: passagetext}));
-				}}/>
+				}}/>*/}
 
 				<AddRulesButton
 					rules={convertToObject(passage.text).rules}
@@ -168,11 +168,20 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 						dispatch(updatePassage(story, passage, {text: passagetext}));
 
 					}}
+					onSelect={(type)=>{
+						const _node = {
+							...node,
+							type
+						}
+						const passagetext = convertToString(_node);
+						dispatch(updatePassage(story, passage, {text: passagetext}));
+					}}
 				/>		
 				<AddOnStartButton
 					lines={(convertToObject(passage.text||"").onstart || {}).speech || []}
 					actions={(convertToObject(passage.text||"").onstart || {}).actions || []}
 					onAdd={handleAddStart}
+					label={"on start"}
 				/>
 				{/*<MenuButton
 					icon={<IconResize />}

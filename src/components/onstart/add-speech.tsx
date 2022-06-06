@@ -5,7 +5,7 @@ import {TextArea} from '../control/text-area';
 
 import './add-onstart-button.css';
 import { IconButton } from '../control/icon-button';
-import { IconPlus } from '@tabler/icons';
+import { IconPlus, IconTrashX } from '@tabler/icons';
 import { TextSelect } from '../control/text-select';
 
 export interface Speech {
@@ -91,10 +91,10 @@ export const AddSpeech: React.FC<AddSpeechProps> = props => {
     },[lineIndex])
 
     React.useEffect(()=>{
-        if (lineIndex === 0){
-            onAdd([{words, voice, rate, delay}]);
-        }
-        else{
+       // if (lineIndex === 0){
+        //    onAdd([{words, voice, rate, delay}]);
+       // }
+       // else{
             const newlines = (lines||[]).map((item,i)=>{
                 if (i===lineIndex){
                     return {words, voice, rate, delay}
@@ -102,16 +102,35 @@ export const AddSpeech: React.FC<AddSpeechProps> = props => {
                 return item;
             })
             onAdd(newlines)
-        }
+      //  }
     },[words,voice,rate,delay]);
 
+    const deleteLine = (index:number)=>{
+        onAdd([...lines.slice(0, index),...lines.slice(index + 1)]);
+    }
+
     const renderLines = ()=>{
-       return  lines.map((line,i)=>(<div onClick={()=>{setLineIndex(i)}} key={i} className="lines">
-                    <div className={"words"}>{line.words}</div> 
-                    <div className={"voice"}>{line.voice}</div>
-                    {/*<div className={"rate"}>{line.rate}</div>*/}
-                    <div className={"delay"}>{line.delay}</div>
-                </div>))
+       const rows =  lines.map((line,i)=>(<tr onClick={()=>{setLineIndex(i)}} key={i} >
+          
+                    <td style={{fontSize:"0.9em", paddingTop:7, width:220, maxWidth:220, overflow:"hidden"}}>{line.words}</td> 
+                    <td style={{fontSize:"0.9em", paddingTop:7}}>{line.voice}</td>
+                    <td style={{fontSize:"0.9em", paddingTop:7}}>{line.delay}</td>
+                    <td style={{fontSize:"0.9em", paddingTop:7}}><IconButton icon={<IconTrashX />} iconOnly={true} label={""} onClick={()=>{deleteLine(i)}} variant="primary"/></td>
+                </tr>))
+
+        return  <table>
+                    <thead>
+                        <tr>
+                            <th style={{textAlign:"start", fontSize:"0.9em"}}>words</th>
+                            <th style={{textAlign:"start",fontSize:"0.9em"}}>voice</th>
+                            <th style={{textAlign:"start",fontSize:"0.9em"}}>pause(ms)</th>
+                            <th style={{textAlign:"start"}}></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                            {rows}
+                    </tbody>
+                </table>
     }
 
 	const {t} = useTranslation();
@@ -125,14 +144,21 @@ export const AddSpeech: React.FC<AddSpeechProps> = props => {
     }
 
     return (<div className="speechcontainer">
+            <div style={{borderBottom:"1px solid black", marginBottom:15}}>
             <div className="speechformitem">
                 <TextArea  style={{width:268}} placeholder="something to say" onChange={e => setWords(e.target.value.replace( /[,]/g," "))} value={words}>words</TextArea></div>
-            <div className="paramline">
+            <div className="paramline" style={{marginTop:15}}>
+               
                 <TextSelect onChange={handleVoiceSelect} options={voices.map(a => ({ label: a.name, value: a.name }))} value={voice}>{"voice"}</TextSelect>
+                
                 {/*<TextInput style={{width:60}}  placeholder="rate" onChange={e => setRate(e.target.value)} value={rate}></TextInput>*/}
                 <TextInput style={{width:90}}  placeholder="delay(ms)" onChange={e => setDelay(e.target.value)} value={delay}></TextInput>
             </div>
-            <IconButton icon={<IconPlus />} label={'add more speech'} onClick={handleAdd} variant="create"/>
+            
+            <div style={{marginTop:10, marginBottom:15, textAlign:"center"}}>
+                <IconButton icon={<IconPlus />} label={'add more speech'} onClick={handleAdd} variant="create"/>
+            </div>
+            </div>
             {renderLines()}
         </div>);
 }

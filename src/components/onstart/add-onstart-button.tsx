@@ -94,7 +94,7 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
     const addParallelAction = ()=>{
 		setActions([...actions,[{"action":""}]]);
 	}
-   
+
 	return (
 		<span className="add-tag-button">
 			<CardButton
@@ -104,29 +104,37 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
 				onChangeOpen={(e)=>{setOpen(true)}}
 				open={open}
 			>
-				<CardContent style={{width:400}}>
-					<TextSelect
-						onChange={handleTypeChange}
-						options={[
-							{disabled:false, label:"action", value:"action"},
-                            {disabled:false, label:"speech", value:"speech"}
-						]}
-						value={startType}
-					>
-						{t('components.onStartButton.selectType')}
-					</TextSelect>
-                    {startType === "action" && (
-                        <Actions actions={actions} 
-                        deleteAction={(a,s)=>deleteAction(a,s)}
-                        addAction={(aindex:number, _action:Action)=>{addAction(aindex, _action)}}
-                        editAction={(aindex:number, subindex:number, action:Action)=>editAction(aindex,subindex,action)}
-                        addParallelAction={()=>addParallelAction()}/>
-                    )}
-                    {startType === "speech" && (
-                        <AddSpeech lines={lines} onAdd={(lines)=>{setLines(lines)}}/>
-                    )}
-					{creatingStart && !!validationMessage && <p>{validationMessage}</p>}
+            
+				<CardContent style={{width:440, padding:15}}>
+                    <div className="help">Make something happen immediately when this node is triggered. You could either have a voice in the caravan say something (choose type: speech), and/or you could control the caravan' sensors (choose type:action)</div>
+                    <div style={{padding:15, background:"#cfe4fc", borderRadius:5, marginTop:15}}>
+                        <TextSelect
+                            onChange={handleTypeChange}
+                            options={[
+                                {disabled:false, label:"action", value:"action"},
+                                {disabled:false, label:"speech", value:"speech"}
+                            ]}
+                            value={startType}
+                        >
+                            {t('components.onStartButton.selectType')}
+                        </TextSelect>
+                        {startType === "action" && (
+                          
+                            <Actions actions={actions} 
+                            deleteAction={(a,s)=>deleteAction(a,s)}
+                            addAction={(aindex:number, _action:Action)=>{addAction(aindex, _action)}}
+                            editAction={(aindex:number, subindex:number, action:Action)=>editAction(aindex,subindex,action)}
+                            addParallelAction={()=>addParallelAction()}/>
+                            
+                        )}
+                        {startType === "speech" && (
+                            <AddSpeech lines={lines} onAdd={(lines)=>{setLines(lines)}}/>
+                        )}
+                        </div>
+                        {creatingStart && !!validationMessage && <p>{validationMessage}</p>}
+                    
 				</CardContent>
+                <div style={{ display:"flex", justifyContent:"center"}}>
 				<ButtonBar>
 					<IconButton
 						disabled={!canAdd}
@@ -141,6 +149,7 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
 						onClick={() => setOpen(false)}
 					/>
 				</ButtonBar>
+                </div>
 			</CardButton>
 		</span>
 	);

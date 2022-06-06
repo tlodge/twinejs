@@ -62,6 +62,7 @@ export const Actions: React.FC<ActionsProps> = props => {
     if (actions.length <= 0){
         return bootstrap();
     }else{
+        //TODO: schekc edit action here (how can it remember speech aprams!!)
         const lines = actions.map((arr, aindex)=>{
             
             const rows =  arr.map(((action,subindex)=>{
