@@ -1,5 +1,5 @@
 import { IconButton } from "../control/icon-button";
-import { Action } from "../onstart/add-actions";
+import { Action, Method } from "../onstart/add-actions";
 import {  IconArrowBarRight, IconEdit, IconPlus, IconTrashX } from '@tabler/icons';
 import { AddAction } from './add-action';
 import React from "react";
@@ -35,6 +35,7 @@ export const Actions: React.FC<ActionsProps> = props => {
     }
 
     const close = ()=>{
+        console.log("settin gmode to emot!!");
         setMode("");
     }
 
@@ -51,16 +52,23 @@ export const Actions: React.FC<ActionsProps> = props => {
     }
 
     const bootstrap = ()=>{
-        return (<>				
+
+        return <div style={{marginTop:10}}>
+                <IconButton icon={<IconPlus />} style={{fontSize:"0.8em"}} label={"add a new action"} onClick={()=>{
+                    addAction(0,{action:"", params:"{}", method:Method.GET});
+                    setMode("edit");
+                }} variant="primary"/> 
+        </div>
+        /*return (<>				
                 {<AddAction onClose={close} action={{action:""}} onAdd={(_action:Action)=>addAction(0,_action)}/>}
                 <div style={{textAlign:"center"}}>
                     <IconButton icon={<IconPlus />} iconOnly={true} label={""} onClick={()=>setMode("add")} variant="primary"/> 
                 </div>
-        </>)
+        </>)*/
     }
 
     if (actions.length <= 0){
-        return bootstrap();
+      return bootstrap();
     }else{
         //TODO: schekc edit action here (how can it remember speech aprams!!)
         const lines = actions.map((arr, aindex)=>{

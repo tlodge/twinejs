@@ -5,6 +5,7 @@
 	"author": "Chris Klimas <chris@twinery.org>",
 	"license": "GPL-3.0",
 	"private": true,
+	"proxy": "http://127.0.0.1:3001",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/klembot/twinejs"
@@ -40,6 +41,7 @@
 		"scroll": "^3.0.1",
 		"segseg": "^1.0.0",
 		"semver": "^7.3.4",
+		"superagent": "^7.1.6",
 		"tiny-uuid": "^1.0.0",
 		"ua-parser-js": "^0.7.28"
 	},
@@ -73,6 +75,7 @@
 		"@types/react-transition-group": "^4.4.1",
 		"@types/scroll": "^3.0.0",
 		"@types/semver": "^7.3.4",
+		"@types/superagent": "^4.1.15",
 		"@types/ua-parser-js": "^0.7.36",
 		"cpy": "^8.1.2",
 		"cpy-cli": "^3.1.1",

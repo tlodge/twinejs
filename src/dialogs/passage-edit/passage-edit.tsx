@@ -152,13 +152,22 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 					const passagetext = convertToString(_node);
 					dispatch(updatePassage(story, passage, {text: passagetext}));
 				}}/>*/}
-
+				<AddOnStartButton
+					lines={(convertToObject(passage.text||"").onstart || {}).speech || []}
+					actions={(convertToObject(passage.text||"").onstart || {}).actions || []}
+					onAdd={handleAddStart}
+					onClose={()=>{console.log("closed!")}}
+					label={"on start"}
+				/>
 				<AddRulesButton
 					rules={convertToObject(passage.text).rules}
 					type={node.type}
 					label="rules"
 					onAdd={(rules:Rule[])=>{
-						const passageobj = {...convertToObject(passage.text), type:"speech"}
+						const passageobj = {...convertToObject(passage.text)}
+
+						
+
 						const _updated = {
 							...passageobj,
 							rules /*: [...passageobj.rules, ...rules]*/
@@ -169,20 +178,20 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 
 					}}
 					onSelect={(type)=>{
+						
 						const _node = {
 							...node,
 							type
 						}
+						//THIS IS THE BIT THAT ADDS /t/n!!
 						const passagetext = convertToString(_node);
+						
+						console.log(passagetext);
+
 						dispatch(updatePassage(story, passage, {text: passagetext}));
 					}}
 				/>		
-				<AddOnStartButton
-					lines={(convertToObject(passage.text||"").onstart || {}).speech || []}
-					actions={(convertToObject(passage.text||"").onstart || {}).actions || []}
-					onAdd={handleAddStart}
-					label={"on start"}
-				/>
+				
 				{/*<MenuButton
 					icon={<IconResize />}
 					items={[

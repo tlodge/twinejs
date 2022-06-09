@@ -1,4 +1,4 @@
-import { IconCheck, IconTrashX } from '@tabler/icons';
+import { IconCheck, IconTrashX, IconUpload } from '@tabler/icons';
 import * as React from 'react';
 import {useTranslation} from 'react-i18next';
 import { IconButton } from '../control/icon-button';
@@ -6,6 +6,7 @@ import {TextInput} from '../control/text-input';
 import { TextSelect } from '../control/text-select';
 import { Action, Method } from '../onstart/add-actions';
 import { AddSpeech } from '../onstart/add-speech';
+import request from 'superagent';
 
 import './add-rules-button.css';
 
@@ -37,7 +38,7 @@ const actions = [
     {name: "smell right off", id: "smell-right-off", url:"http://[smell-right]/off", method:Method.GET, params:"{}", description:"This will turn off the right hand side smell actuator"},
     {name: "smell left on", id: "smell-left-on", url:"http://[smell-left]/on3", method:Method.GET, params:"{}", description:"This will start the left hand side smell actuator"},
     {name: "smell left off", id: "smell-left-off", url:"http://[smell-left]/off", method:Method.GET, params:"{}", description:"This will turn off the left hand side smell actuator"},*/
-    {name: "nanoleaf", id:"nanoleaf", url:"http://[lenovo]:9104/ui/api", method:Method.GET,params:`{"query":{"hue":203,"sat":91,"brightness":99}}`, description:"This will set the colours of the nanoleaf lights (under the caravan seat)"},
+    {name: "nanoleaf", id:"nanoleaf", url:"http://[lenovo]:9104/ui/api/hex", method:Method.GET,params:`{"query":{"hue":203,"sat":91,"brightness":99}}`, description:"This will set the colours of the nanoleaf lights (under the caravan seat)"},
     {name: "hue", id: "huecolour", method:Method.GET,url:"http://[lenovo]:9092/ui/api/hex",  params:`{"query":{"hex":"ff0000"}}`, description:"This will change the hue lights colour"},
     /*{name: "huescript", id: "huescript", method:Method.GET,url:"http://[lenovo]:9092/ui/api/light_script",  params:`{"query":{"script_id":"alightscript"}}`, description:"This will run a pre-authored script that sets the hue light's colours (the strip above the screen)"},*/
     {name: "togglewindows", id: "togglewindows", method:Method.GET,url:"http://[windows]:9222/H",  params:"{}", description:"This will toggle the opacity of the caravan windows"},
@@ -46,7 +47,7 @@ const actions = [
     {name: "screen - home", id: "screen-home", method:Method.GET, url:"http://[lenovo]:9102/api/home", params:"{}", description:"This set the caravan screen to the 'future mundane' title"},
     {name: "screen - dyson", id: "screen-dyson", method:Method.GET, url:"http://[lenovo]:9102/api/air", params:"{}", description:"This will show the air quality readings from the dyson fan"},
     {name: "screen - media", id: "screen-media", method:Method.GET, url:"http://[lenovo]:9102/api/media", params:"{}", description:"This will make the caravan screen go black, ready to play a media file.  Follow this action with a 'screen - play' action"},
-    {name: "screen - play", id: "screen-media-play", method:Method.GET, url:"http://[lenovo]:9102/api/media/play",  params:`{"query":{"media":"amediafile.mp4","delay":0}}`, description:"This will play a media (mp4) file, which must be in the media directory on the lenovo.  Make sure you have called 'screen - media' first "},
+    {name: "screen - play", id: "screen-media-play", method:Method.GET, url:"http://[lenovo]:9102/api/media/play",  params:`{"query":{"media":"","delay":0}}`, description:"This will play a media (mp4) file, which must be in the media directory on the lenovo.  Make sure you have called 'screen - media' first "},
     {name: "screen - camera", id: "screen-camera", method:Method.GET, url:"http://[lenovo]:9102/api/camera", params:"{}", description:"This will show live video from the camera on the caravan screen"},
     /*{name: "screen - scan", id: "screen-scan", method:Method.GET, url:"http://[lenovo]:9102/api/camera/scan", params:"{}", description:"This will place face meshes over all faces in the streamed video (make sure you have called the 'screen-camera' action first"},*/
     {name: "screen - message", id: "message", method:Method.GET, url:"http://[lenovo]:9102/api/message", params:`{"query":{"message":"a message"}}`, description:"This will flash up a message on the screen, it will overlay it on whatever is currently on there"},
@@ -54,7 +55,6 @@ const actions = [
 ]
 
 const _lookupaction = (action:Action)=>{
-    console.log("looking up action", action);
     const url = (action.action || "").toString();
     const idx = actions.map(a=>a.url).indexOf(url);
     return idx === -1 ? "raw" : actions[idx].id;
@@ -62,12 +62,21 @@ const _lookupaction = (action:Action)=>{
 
 export const AddAction: React.FC<AddActionProps> = props => {
 	const {onAdd,onClose,action} = props;
-    
-    console.log("am in here with action", action);
-
 	const [_action, _setAction] = React.useState<Action>(action);
+    const [file, setFile] = React.useState<File>();
+    const [mediaList, setMediaList] = React.useState<string[]>([]);
     const [selectedActionProfile, setSelectedActionProfile] = React.useState(_lookupaction(action));
 	const {t} = useTranslation();
+
+    React.useEffect(()=>{
+        request.get("/media/list").end((err,response)=>{
+            if (!err){
+                const {files=[]} = response.body;
+                setMediaList(files);
+            }
+        })
+        
+    },[file]);
 
 	const handleMethodChange = (event: React.ChangeEvent<HTMLSelectElement>)=>{
 		const _method = event.target.value;
@@ -146,7 +155,18 @@ export const AddAction: React.FC<AddActionProps> = props => {
 
     const _hueparams = ()=>{
        
-        const params = JSON.parse(action.params || "{}");
+        const params = JSON.parse(_action.params || "{}");
+        const {query={}} = params;
+        const {hex="ff0000"} = query;
+        return <> 
+            <input type="color" id="favcolor" name="favcolor" value={`#${hex}`} onChange={(e)=>{setParams(JSON.stringify({query:{hex:e.target.value.replace("#","")}}))}}/>
+            <p className="description">select a colour for the lights</p>
+        </>
+    }
+
+    const _nanoparams = ()=>{
+       
+        const params = JSON.parse(_action.params || "{}");
         const {query={}} = params;
         const {hex="ff0000"} = query;
         return <> 
@@ -160,15 +180,83 @@ export const AddAction: React.FC<AddActionProps> = props => {
     }
 
     const _messageparams = ()=>{
-        const params = JSON.parse(action.params || "{}");
+        const params = JSON.parse(_action.params || "{}");
         const {query={}} = params;
         const {message="a message"} = query;
         return <TextInput onChange={e => setParams(JSON.stringify({query:{message:e.target.value}}))} helptext={`the message you want to display`} value={message}>message</TextInput>
     }
 
+    const onFileChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
+        const {files=[]} = e.target;
+        if (files && files.length > 0){
+            setFile(files[0]);
+        }
+    }
+
+    const onFileUpload = ()=>{
+        if (file){
+            const formData = new FormData(); 
+     
+            // Update the formData object 
+            formData.append( 
+                "mediaFile", 
+                file,
+                file.name 
+            ); 
+
+            request.post("/media/upload").send(formData).end(function(err, response) {
+                console.log(err, response);
+                if (!err){
+                    setFile(undefined);
+                    setParams(JSON.stringify({query:{media:file.name}}));
+                }
+            });
+        }
+        
+    }
+
+    const _mediaparams = ()=>{
+
+        const params = JSON.parse(_action.params || "{}");
+        const {query={}} = params;
+        const {media=""} = query;
+
+        const _setMedia = (e:React.ChangeEvent<HTMLSelectElement>)=>{
+            console.log("setting media", e.target.value);
+           setParams(JSON.stringify({query:{media:e.target.value}}));
+        }
+
+        return  <div style={{paddingBottom:7}}>
+                    <div style={{paddingTop:7,paddingBottom:15,  borderBottom:"1px solid"}}>
+                        <div style={{marginTop:7,marginBottom:15, fontWeight:700}}>
+                                Select from media on caravan server
+                        </div>
+                        <TextSelect onChange={_setMedia}  options={[{label:"",value:""},...mediaList.map(m=>({label:m, value:m}))]} value={media}>media in caravan</TextSelect>
+                    </div>
+                    <div style={{paddingTop:15,paddingBottom:7}}>
+                        <div style={{marginTop:7, marginBottom:15, fontWeight:700}}>
+                            Or upload new media
+                        </div>
+                        <div>
+                            <input type="file" onChange={onFileChange} /> 
+                        </div>
+                        <div style={{marginTop:10}}>
+                            {file && <IconButton
+                                    disabled={false}
+                                    icon={<IconUpload />}
+                                    label={t('Upload this file')}
+                                    onClick={onFileUpload}
+                                    variant="primary"
+                            />}
+                        </div>
+                    </div>
+                   {media.trim() != "" && <div style={{textAlign:"center", borderRadius: 5, padding:10, marginTop:15, fontSize:"1em"}}><strong>play file: </strong>{`${media}`}</div>}
+                </div>
+    }
+
     //{"body":{"text":"a line of text"}}
     const _printerparams = ()=>{
-        const params = JSON.parse(action.params || "{}");
+        const params = JSON.parse(_action.params || "{}");
         const {body={}} = params;
         const {text="a line to print"} = body;
         return <TextInput onChange={e => setParams(JSON.stringify({body:{text:e.target.value}}))} helptext={`the message you want to display`} value={text}>line to print</TextInput>
@@ -238,6 +326,10 @@ export const AddAction: React.FC<AddActionProps> = props => {
     const renderParams = ()=>{
        
         switch (selectedActionProfile){
+            case "screen-media-play":
+                return _mediaparams();
+            case "nanoleaf":
+                return _nanoparams();
             case "huecolour":
                 return _hueparams();
             case "raw":

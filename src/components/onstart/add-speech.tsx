@@ -118,7 +118,8 @@ export const AddSpeech: React.FC<AddSpeechProps> = props => {
                     <td style={{fontSize:"0.9em", paddingTop:7}}><IconButton icon={<IconTrashX />} iconOnly={true} label={""} onClick={()=>{deleteLine(i)}} variant="primary"/></td>
                 </tr>))
 
-        return  <table>
+        return  <div style={{maxHeight:500, overflowY:"scroll"}}>
+                <table>
                     <thead>
                         <tr>
                             <th style={{textAlign:"start", fontSize:"0.9em"}}>words</th>
@@ -131,6 +132,7 @@ export const AddSpeech: React.FC<AddSpeechProps> = props => {
                             {rows}
                     </tbody>
                 </table>
+                </div>
     }
 
 	const {t} = useTranslation();

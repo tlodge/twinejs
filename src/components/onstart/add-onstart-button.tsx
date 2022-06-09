@@ -16,13 +16,14 @@ export interface AddOnStartButtonProps {
 	icon?: React.ReactNode;
 	label?: string;
 	onAdd: (lines:Speech[], actions:Action[][]) => void;
+    onClose : ()=>void
     lines: Speech[]
     actions: Action[][]
 }
 
 export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
 
-	const {icon, label, onAdd} = props;
+	const {icon, label, onAdd,onClose} = props;
 	const [creatingStart, setCreatingStart] = React.useState(true);
     const [startType, setStartType] = React.useState('speech');
     const [lines, setLines] = React.useState<Array<Speech>>(props.lines);
@@ -137,7 +138,7 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
                 <div style={{ display:"flex", justifyContent:"center"}}>
 				<ButtonBar>
 					<IconButton
-						disabled={!canAdd}
+						disabled={false}
 						icon={<IconPlus />}
 						label={t('common.add')}
 						onClick={handleAdd}
@@ -146,7 +147,10 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
 					<IconButton
 						icon={<IconX />}
 						label={t('common.cancel')}
-						onClick={() => setOpen(false)}
+						onClick={() => {
+                            setOpen(false);
+                            onClose();
+                        }}
 					/>
 				</ButtonBar>
                 </div>

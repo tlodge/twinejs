@@ -1,4 +1,5 @@
 import * as React from 'react';
+import request from 'superagent';
 import {ButtonBar} from '../../../../components/container/button-bar';
 import {RenameStoryButton} from '../../../../components/story/rename-story-button';
 import {Story, updateStory, useStoriesContext} from '../../../../store/stories';
@@ -10,14 +11,15 @@ import {TagStoryButton} from './tag-story-button';
 import {ExportStoriesButton} from './export-stories-button';
 import { convertToCaravan } from '../../../../util/caravan';
 
+
 export interface StoryActionsProps {
 	selectedStory?: Story;
 }
-const exportData = (stories:Story[]) => {
+const exportData = async (stories:Story[]) => {
 	let name = "";
-
+	
 	const _stories = stories.reduce((acc:any,s)=>{
-		name = `${name}_${(s.name || "not").substring(0,3)}`;
+		name = stories.length == 1 ? s.name.replace(/\s+/g,'') : `${name}_${(s.name || "not").substring(0,3)}`;
 		const arr = convertToCaravan(s);
 		if (arr.length > 0){
 			return [...acc, arr[0]]
@@ -25,10 +27,12 @@ const exportData = (stories:Story[]) => {
 		return acc;
 	},[])
 
-	
     const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
       JSON.stringify(_stories,null,4)
     )}`;
+	
+	await request.post('/author/save').set('Content-Type', 'application/json').send({name,layer:_stories});
+
     const link = document.createElement("a");
     link.href = jsonString;
     link.download = `${name}.json`;

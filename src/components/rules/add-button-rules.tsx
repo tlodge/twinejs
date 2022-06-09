@@ -153,7 +153,7 @@ export const AddButtonRules: React.FC<AddRulesProps> = props => {
 		setRules(rules.reduce((acc:Rule[], item:Rule, i:number)=>{
 			if (i !== index)
 				return [...acc, item];
-			return [...acc, {...item, next}];
+			return [...acc, {...item, next: next.trim()}];
 		},[]));
 	}
 
@@ -190,7 +190,7 @@ export const AddButtonRules: React.FC<AddRulesProps> = props => {
 						 editAction={(aindex:number, subindex:number, action:Action)=>editAction(index,aindex,subindex,action)}
 						 addParallelAction={()=>addParallelAction(index)}/>}
 				
-				{renderNext(index,rule.next||"")}
+				{renderNext(index,(rule.next||"").trim())}
 			</div>)
 	}
 

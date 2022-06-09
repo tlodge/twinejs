@@ -29,6 +29,7 @@ export const AddRulesButton: React.FC<AddRuleButton> = props => {
 	let validationMessage: string | undefined = undefined;
 
 	const typeChange = (e: React.ChangeEvent<HTMLSelectElement>)=>{
+		console.log("seen a type change!!", e.target.value);
 		props.onSelect(e.target.value);
 	}
 	return (
@@ -42,7 +43,7 @@ export const AddRulesButton: React.FC<AddRuleButton> = props => {
 				}}
 				open={open}
 			>
-				<CardContent style={{width:420, overflowY:"auto"}}>
+				<CardContent style={{width:460, overflowY:"auto"}}>
 					<div className="container">
 						<div className="help">Rules determine what needs to happen to move from this node to another node.  So far we support buttons being pressed (by the experience controller) or keywords being said by the particpants (experimental)</div>
 						
@@ -52,11 +53,13 @@ export const AddRulesButton: React.FC<AddRuleButton> = props => {
 							</div>
 							
 							{type === "button" && <AddButtonRules onCancel={()=>{setOpen(false)}} type={type} rules={props.rules}  onAdd={(rules:Rule[])=>{
+								console.log("add buttn rules, add rukes", rules);
 								setOpen(false);
 								onAdd(rules);
 							}}/>}
 						
 							{type === "speech" && <AddSpeechRules onCancel={()=>{setOpen(false)}} type={type} rules={props.rules}  onAdd={(rules:Rule[])=>{
+								console.log("add speech rules, add rukes", rules);
 								setOpen(false);
 								onAdd(rules);
 							}}/>}

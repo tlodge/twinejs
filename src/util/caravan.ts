@@ -77,9 +77,7 @@ const extractParams = (tuplestr:string="()") : Record<string,any>=>{
 }
 
 const extractParamsString = (str:string)=>{
-    console.log("extracting param string", str);
     const toks = str.trim().substring(1, str.trim().length-1);
-    console.log("toks are", toks);
     const si = toks.indexOf("{");
     const ei = toks.lastIndexOf("}");
     return si > -1 && ei > -1 ? toks.substring(si,ei+1) : "";
@@ -97,11 +95,9 @@ const formatURL = (str:string)=>{
 }
 
 const parseActionLine = (line:string) : Action=>{
-    console.log("parsing action line!", line);
-
     const params = extractParamsString(line);
     const toks = line.replace(params,"").replace( /[()]/g,"").replace(/["]/g,"").trim().split(',');
-    console.log("toks are", toks);
+ 
 
     if (toks.length > 0){
         
@@ -109,7 +105,7 @@ const parseActionLine = (line:string) : Action=>{
       
 
         const paramstr = (params||"{}").replace(/[(]/g,"{").replace(/[)]/g,"}");//.replace(/[']/g,"\"");
-        console.log("paramstr is", paramstr);
+        
 
         try{
             paramobj = JSON.parse(paramstr);
@@ -262,7 +258,7 @@ const onStartFromNode = (node:Node):string=>{
 const rulesFromNode = (node:Node):string=>{
     return node.rules.reduce((acc:string, rule:Rule)=>{
         const actionstr = (rule.actions && rule.actions.length > 0) ? `\n\t\t[actions]${actionsToString(rule.actions, '\t\t\t')}`:"";
-        return `${acc}\n\t[rule]\n\t\t[[${rule.rule.operand}|${rule.next}]]${actionstr}`
+        return `${acc}\n\t[rule]\n\t\t[[${rule.rule.operand}|${rule.next.trim()}]]${actionstr}`
     },"");
 }
 
