@@ -34,10 +34,10 @@ const actions = [
     {name: "arm expand", id:"arm-expand", url:"http://[lenovo]:9107/api/arm/expand", params:"{}", method:Method.GET, description:"This will move the camera arm into the extended state"},
     {name: "arm collapse", id:"arm-collapse", url:"http://[lenovo]:9107/api/collapse", params:"{}", method:Method.GET, description:"This will move the camera arm into the rest state"},
     {name: "fan", id: "fan", url:"http://[lenovo]:9097/ui/api/fan", params:`{"query":{"rotate": true,"power":10,"cool":true,"from":0,"to":90}}`, method:Method.GET, description:"This will control the dyson fan (temperature, air speed, rotation)"},
-    /*{name: "smell right on", id: "smell-right-on", url:"http://[smell-right]/on3", method:Method.GET, params:"{}", description:"This will start the right hand side smell actuator"},
+    {name: "smell right on", id: "smell-right-on", url:"http://[smell-right]/on3", method:Method.GET, params:"{}", description:"This will start the right hand side smell actuator"},
     {name: "smell right off", id: "smell-right-off", url:"http://[smell-right]/off", method:Method.GET, params:"{}", description:"This will turn off the right hand side smell actuator"},
     {name: "smell left on", id: "smell-left-on", url:"http://[smell-left]/on3", method:Method.GET, params:"{}", description:"This will start the left hand side smell actuator"},
-    {name: "smell left off", id: "smell-left-off", url:"http://[smell-left]/off", method:Method.GET, params:"{}", description:"This will turn off the left hand side smell actuator"},*/
+    {name: "smell left off", id: "smell-left-off", url:"http://[smell-left]/off", method:Method.GET, params:"{}", description:"This will turn off the left hand side smell actuator"},
     {name: "nanoleaf", id:"nanoleaf", url:"http://[lenovo]:9104/ui/api/hex", method:Method.GET,params:`{"query":{"hue":203,"sat":91,"brightness":99}}`, description:"This will set the colours of the nanoleaf lights (under the caravan seat)"},
     {name: "hue", id: "huecolour", method:Method.GET,url:"http://[lenovo]:9092/ui/api/hex",  params:`{"query":{"hex":"ff0000"}}`, description:"This will change the hue lights colour"},
     /*{name: "huescript", id: "huescript", method:Method.GET,url:"http://[lenovo]:9092/ui/api/light_script",  params:`{"query":{"script_id":"alightscript"}}`, description:"This will run a pre-authored script that sets the hue light's colours (the strip above the screen)"},*/
@@ -51,6 +51,7 @@ const actions = [
     {name: "screen - camera", id: "screen-camera", method:Method.GET, url:"http://[lenovo]:9102/api/camera", params:"{}", description:"This will show live video from the camera on the caravan screen"},
     /*{name: "screen - scan", id: "screen-scan", method:Method.GET, url:"http://[lenovo]:9102/api/camera/scan", params:"{}", description:"This will place face meshes over all faces in the streamed video (make sure you have called the 'screen-camera' action first"},*/
     {name: "screen - message", id: "message", method:Method.GET, url:"http://[lenovo]:9102/api/message", params:`{"query":{"message":"a message"}}`, description:"This will flash up a message on the screen, it will overlay it on whatever is currently on there"},
+    {name: "screen - qrcode", id: "qrcode", method:Method.GET, url:"http://[lenovo]:9102/api/qrcode", params:`{"query":{"qrcode":"http://news.bbc.co.uk"}}`, description:"This will put a qrcode up on the screen to, for example, get a user to use a webapp served by the caravan.  Webapps could call bespoke webhook event to make something happen in the caravan"},
     /*{name: "mini screen", id:"mini-screen", method:Method.GET, url:"http://[lenovo]:9107/api/update", params:`{"query":{"html":"<img src='https://via.placeholder.com/150'>"}}`, description:"This will send arbitrary HTML to the caravan's mini screens"},*/
 ]
 
@@ -262,6 +263,13 @@ export const AddAction: React.FC<AddActionProps> = props => {
         return <TextInput onChange={e => setParams(JSON.stringify({body:{text:e.target.value}}))} helptext={`the message you want to display`} value={text}>line to print</TextInput>
     }
 
+    const _qrcodeparams = ()=>{
+        const params = JSON.parse(_action.params || "{}");
+        const {query={}} = params;
+        const {qrcode="http://news.bbc.co.uk"} = query;
+        return <TextInput onChange={e => setParams(JSON.stringify({query:{qrcode:e.target.value}}))} helptext={`the url to embed with the qrcode`} value={qrcode}>url</TextInput>
+    }
+
     const _speechparams = ()=>{
         
         //FIX!!
@@ -342,6 +350,8 @@ export const AddAction: React.FC<AddActionProps> = props => {
                 return _fanparams();
             case "speech":    
                 return _speechparams();
+            case "qrcode":
+                return _qrcodeparams();    
             default:
                 return;
 

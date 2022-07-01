@@ -194,7 +194,7 @@ const parseRuleText = (text:string, type:string) : Rule =>{
             //operand:  type==="speech"? operand.split(",").filter(t=>t.trim()!=="") : operand,
             operand:  type==="speech"? operand.replace(/\s+/g,"").split(",").filter(t=>t.trim()!=="") : operand.replace(/\s+/g,""),
         },
-        next: next,//.replace(/\s+/g,""),
+        next: next.trim(),//.replace(/\s+/g,""),
         actions : extractActions((actions||"").trim())
     }
 }
@@ -350,7 +350,7 @@ const convertToCaravanObject = (_name:string, text:string)=>{
         type,
         name,
         id:name,
-        subscription: type === "speech" ? "/speech" : "/press",
+        subscription: type === "speech" ? "/speech" : type === "button" ? "/press" : "/webhook",
         onstart : {
             speech,
             actions

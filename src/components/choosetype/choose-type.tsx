@@ -9,5 +9,5 @@ export interface ChooseTypeProps {
 }
 
 export const ChooseType: React.FC<ChooseTypeProps> = props => {
-    return <TextSelect onChange={(e)=>props.onSelect(e)} options={[{label:"button", value:"button"}, {label:"speech", value:"speech"}]} value={props.type}>node type</TextSelect>
+    return <TextSelect onChange={(e)=>props.onSelect(e)} options={[{label:"button", value:"button"}, {label:"webhook", value:"webhook"}, {label:"speech", value:"speech"}]} value={props.type}>node type</TextSelect>
 }

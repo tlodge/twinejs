@@ -5,7 +5,7 @@ import {CardContent} from '../container/card';
 import {CardButton} from '../control/card-button';
 import { AddButtonRules } from './add-button-rules';
 import { AddSpeechRules } from './add-speech-rules';
-
+import { AddWebhookRules } from './add-webhook-rules';
 import './add-rules-button.css';
 import {Rule} from './add-button-rules';
 import { TextSelect } from '../control/text-select';
@@ -49,11 +49,17 @@ export const AddRulesButton: React.FC<AddRuleButton> = props => {
 						
 						<div style={{padding:15, background:"#cfe4fc", borderRadius:5, marginTop:15}}>
 							<div style={{marginBottom:15, paddingBottom:15, borderBottom:"1px solid black"}}>
-								<TextSelect onChange={typeChange} options={[{label:"button", value:"button"}, {label:"speech", value:"speech"}]} value={type}>rule type</TextSelect>
+								<TextSelect onChange={typeChange} options={[{label:"button", value:"button"}, {label:"webhook", value:"webhook"}, {label:"speech", value:"speech"}]} value={type}>rule type</TextSelect>
 							</div>
 							
 							{type === "button" && <AddButtonRules onCancel={()=>{setOpen(false)}} type={type} rules={props.rules}  onAdd={(rules:Rule[])=>{
 								console.log("add buttn rules, add rukes", rules);
+								setOpen(false);
+								onAdd(rules);
+							}}/>}
+						
+							{type === "webhook" && <AddWebhookRules onCancel={()=>{setOpen(false)}} type={type} rules={props.rules}  onAdd={(rules:Rule[])=>{
+								console.log("add webhook rules, add rukes", rules);
 								setOpen(false);
 								onAdd(rules);
 							}}/>}

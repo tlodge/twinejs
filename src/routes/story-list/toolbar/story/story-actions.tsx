@@ -31,8 +31,11 @@ const exportData = async (stories:Story[]) => {
       JSON.stringify(_stories,null,4)
     )}`;
 	
-	await request.post('/author/save').set('Content-Type', 'application/json').send({name,layer:_stories});
-
+	try{	
+		await request.post('/author/save').set('Content-Type', 'application/json').send({name,layer:_stories});
+	}catch(err){
+		console.log("failed to trabsfer to fmundane engine!");
+	}
     const link = document.createElement("a");
     link.href = jsonString;
     link.download = `${name}.json`;
