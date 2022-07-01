@@ -51,7 +51,7 @@ const actions = [
     {name: "screen - camera", id: "screen-camera", method:Method.GET, url:"http://[lenovo]:9102/api/camera", params:"{}", description:"This will show live video from the camera on the caravan screen"},
     /*{name: "screen - scan", id: "screen-scan", method:Method.GET, url:"http://[lenovo]:9102/api/camera/scan", params:"{}", description:"This will place face meshes over all faces in the streamed video (make sure you have called the 'screen-camera' action first"},*/
     {name: "screen - message", id: "message", method:Method.GET, url:"http://[lenovo]:9102/api/message", params:`{"query":{"message":"a message"}}`, description:"This will flash up a message on the screen, it will overlay it on whatever is currently on there"},
-    {name: "screen - qrcode", id: "qrcode", method:Method.GET, url:"http://[lenovo]:9102/api/qrcode", params:`{"query":{"qrcode":"http://news.bbc.co.uk"}}`, description:"This will put a qrcode up on the screen to, for example, get a user to use a webapp served by the caravan.  Webapps could call bespoke webhook event to make something happen in the caravan"},
+    {name: "screen - qrcode", id: "qrcode", method:Method.GET, url:"http://[lenovo]:9102/api/qrcode", params:`{"query":{"qrcode":"http://[lenovo]:3001/wa/"}}`, description:"This will put a qrcode up on the screen to, for example, get a user to use a webapp served by the caravan.  Webapps could call bespoke webhook event to make something happen in the caravan"},
     /*{name: "mini screen", id:"mini-screen", method:Method.GET, url:"http://[lenovo]:9107/api/update", params:`{"query":{"html":"<img src='https://via.placeholder.com/150'>"}}`, description:"This will send arbitrary HTML to the caravan's mini screens"},*/
 ]
 
@@ -266,7 +266,7 @@ export const AddAction: React.FC<AddActionProps> = props => {
     const _qrcodeparams = ()=>{
         const params = JSON.parse(_action.params || "{}");
         const {query={}} = params;
-        const {qrcode="http://news.bbc.co.uk"} = query;
+        const {qrcode="http://[lenovo]:3001/wa/"} = query;
         return <TextInput onChange={e => setParams(JSON.stringify({query:{qrcode:e.target.value}}))} helptext={`the url to embed with the qrcode`} value={qrcode}>url</TextInput>
     }
 

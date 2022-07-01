@@ -21,3 +21,5 @@ the code for the ui that handles exporting to the caravan
 downloads and attempts to export to caravan: 
             
 ```await request.post('/author/save').set('Content-Type', 'application/json').send({name,layer:_stories});```
+
+* NB - not using choosetype anymore as this is selected in the rules interface 
