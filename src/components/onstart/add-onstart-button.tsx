@@ -25,7 +25,7 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
 
 	const {icon, label, onAdd,onClose} = props;
 	const [creatingStart, setCreatingStart] = React.useState(true);
-    const [startType, setStartType] = React.useState('speech');
+    const [startType, setStartType] = React.useState('action');
     const [lines, setLines] = React.useState<Array<Speech>>(props.lines);
     const [actions, setActions] = React.useState<Action[][]>(props.actions);
 
@@ -109,7 +109,7 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
 				<CardContent style={{width:440, padding:15}}>
                     <div className="help">Make something happen immediately when this node is triggered. You could either have a voice in the caravan say something (choose type: speech), and/or you could control the caravan' sensors (choose type:action)</div>
                     <div style={{padding:15, background:"#cfe4fc", borderRadius:5, marginTop:15}}>
-                        <TextSelect
+                        {/*<TextSelect
                             onChange={handleTypeChange}
                             options={[
                                 {disabled:false, label:"action", value:"action"},
@@ -118,7 +118,7 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
                             value={startType}
                         >
                             {t('components.onStartButton.selectType')}
-                        </TextSelect>
+                        </TextSelect>*/}
                         {startType === "action" && (
                           
                             <Actions actions={actions} 

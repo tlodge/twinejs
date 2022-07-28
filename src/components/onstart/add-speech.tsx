@@ -38,7 +38,7 @@ export interface AddSpeechProps {
     {name:"Chloe", id:"p361"},
 ]*/
 
-const voices = [
+/*const voices = [
     {name:"Daniel"},
     {name:"Fred"},
     {name:"Richard"},
@@ -55,6 +55,14 @@ const voices = [
     {name:"Holly"},
     {name:"Nadia"},
     {name:"Chloe"},
+]*/
+
+const voices = [
+    {name:"Daniel"},
+    {name:"Serena"},
+    {name:"Emily"},
+    {name:"Tom"},
+    {name:"Lee"},
 ]
 
 export const AddSpeech: React.FC<AddSpeechProps> = props => {

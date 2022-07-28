@@ -34,7 +34,7 @@ const exportData = async (stories:Story[]) => {
 	try{	
 		await request.post('/author/save').set('Content-Type', 'application/json').send({name,layer:_stories});
 	}catch(err){
-		console.log("failed to trabsfer to fmundane engine!");
+		console.log("failed to transfer to fmundane engine!");
 	}
     const link = document.createElement("a");
     link.href = jsonString;

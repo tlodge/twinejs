@@ -252,7 +252,8 @@ const speechFromNode = (node: Node): string=>{
 }
 
 const onStartFromNode = (node:Node):string=>{
-    return `\t[speech]\n${speechFromNode(node)}\n\n\t[actions]${actionsToString(node.onstart.actions || [])}`
+    //return `\t[speech]\n${speechFromNode(node)}\n\n\t[actions]${actionsToString(node.onstart.actions || [])}`
+    return `\t[actions]${actionsToString(node.onstart.actions || [])}`
 }
 
 const rulesFromNode = (node:Node):string=>{
