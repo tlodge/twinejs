@@ -276,7 +276,11 @@ export const AddAction: React.FC<AddActionProps> = props => {
         const params = JSON.parse(_action.params || "{}");
         const {body={}} = params;
         const {speech=[]} = body;
-        return <AddSpeech lines={speech} onAdd={(lines)=>{setParams(JSON.stringify({body:{speech:lines}}))}}/>
+        return <AddSpeech lines={speech} onAdd={(lines)=>{
+            console.log("speech added, so setting method to post!!");
+            setMethod(Method.POST);
+            setParams(JSON.stringify({body:{speech:lines}}))
+        }}/>
     }
 
 

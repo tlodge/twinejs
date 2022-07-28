@@ -98,7 +98,6 @@ const parseActionLine = (line:string) : Action=>{
     const params = extractParamsString(line);
     const toks = line.replace(params,"").replace( /[()]/g,"").replace(/["]/g,"").trim().split(',');
  
-
     if (toks.length > 0){
         
         let paramobj = {};
@@ -112,12 +111,12 @@ const parseActionLine = (line:string) : Action=>{
         }catch(err){
             paramobj = {parseErr:paramstr}
         }
-      
+
         return {
             action: formatURL(toks[0]), 
             delay: toks.length > 1 ? Number(toks[1].trim()) : 0, 
             params: toks.length > 2 ? JSON.stringify(paramobj) : "{}",
-            method: toks.length > 3 ? toks[2] === "POST" ? Method.POST : Method.GET : Method.NONE 
+            method: toks.length > 3 ? toks[3] === "POST" ? Method.POST : Method.GET : Method.NONE 
         }
     }
     return {action:""}
