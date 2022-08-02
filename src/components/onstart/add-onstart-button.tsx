@@ -5,48 +5,43 @@ import {ButtonBar} from '../container/button-bar';
 import {CardContent} from '../container/card';
 import {CardButton} from '../control/card-button';
 import {IconButton} from '../control/icon-button';
-import {TextSelect} from '../control/text-select';
-import { AddSpeech } from './add-speech';
 import './add-onstart-button.css';
 import { Speech } from './add-speech';
 import {Action} from './add-actions';
 import { Actions } from '../rules/actions';
+
 
 export interface AddOnStartButtonProps {
 	icon?: React.ReactNode;
 	label?: string;
 	onAdd: (lines:Speech[], actions:Action[][]) => void;
     onClose : ()=>void
-    lines: Speech[]
+    //lines: Speech[]
     actions: Action[][]
 }
 
 export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
-
-	const {icon, label, onAdd,onClose} = props;
+    
+	const {icon, label, onAdd, onClose} = props;
 	const [creatingStart, setCreatingStart] = React.useState(true);
-    const [startType, setStartType] = React.useState('action');
-    const [lines, setLines] = React.useState<Array<Speech>>(props.lines);
-    const [actions, setActions] = React.useState<Action[][]>(props.actions);
-
+    const [actions, setActions] = React.useState<Action[][]>([]);
 	const [open, setOpen] = React.useState(false);
 	const {t} = useTranslation();
 
 	let validationMessage: string | undefined = undefined;
-	let canAdd = lines.length > 0;
+	//let canAdd = lines.length > 0;
+
+
+    React.useEffect(()=>{
+        setActions(props.actions);
+    },[props.actions]);
 
 	function handleAdd() {
-		onAdd(lines,actions);
 		setOpen(false);
 	}
 
-	function handleTypeChange(event: React.ChangeEvent<HTMLSelectElement>) {
-		const startType = event.target.value;
-		setStartType(startType);
-        setCreatingStart(true);
-	}
-
     const deleteAction = (aindex:number,subindex:number)=>{
+       
         const _actions:Action[][] =  actions.reduce((acc:Action[][], arr:Action[], index:number)=>{
             if (aindex===index){
                 if (subindex === 0 && arr.length === 1){
@@ -63,8 +58,8 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
         setActions(_actions);
     }
 
-   
     const addAction = (aindex:number, action:Action)=>{
+        
         if (actions.length === 0){
             setActions([[action]])
         }
@@ -78,6 +73,7 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
     
 
     const editAction = (aindex:number,subindex:number, action:Action)=>{
+       
         const _actions:Action[][] =  actions.reduce((acc:Action[][], arr:Action[], index:number)=>{
             if (aindex===index){
                 return [...acc, arr.reduce((acc:Action[], item:Action, si:number)=>{
@@ -107,33 +103,18 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
 			>
             
 				<CardContent style={{width:440, padding:15}}>
-                    <div className="help">Make something happen immediately when this node is triggered. You could either have a voice in the caravan say something (choose type: speech), and/or you could control the caravan' sensors (choose type:action)</div>
+                    <div className="help">Make something happen immediately when this node is triggered. You could either have a voice in the caravan say something and/or you could control the caravan' sensors</div>
                     <div style={{padding:15, background:"#cfe4fc", borderRadius:5, marginTop:15}}>
-                        {/*<TextSelect
-                            onChange={handleTypeChange}
-                            options={[
-                                {disabled:false, label:"action", value:"action"},
-                                {disabled:false, label:"speech", value:"speech"}
-                            ]}
-                            value={startType}
-                        >
-                            {t('components.onStartButton.selectType')}
-                        </TextSelect>*/}
-                        {startType === "action" && (
+                      
                           
-                            <Actions actions={actions} 
+                        <Actions actions={actions} 
                             deleteAction={(a,s)=>deleteAction(a,s)}
                             addAction={(aindex:number, _action:Action)=>{addAction(aindex, _action)}}
                             editAction={(aindex:number, subindex:number, action:Action)=>editAction(aindex,subindex,action)}
                             addParallelAction={()=>addParallelAction()}/>
                             
-                        )}
-                        {startType === "speech" && (
-                            <AddSpeech lines={lines} onAdd={(lines)=>{setLines(lines)}}/>
-                        )}
-                        </div>
-                        {creatingStart && !!validationMessage && <p>{validationMessage}</p>}
-                    
+                    </div>
+                    {creatingStart && !!validationMessage && <p>{validationMessage}</p>}
 				</CardContent>
                 <div style={{ display:"flex", justifyContent:"center"}}>
 				<ButtonBar>

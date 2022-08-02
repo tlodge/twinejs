@@ -27,7 +27,10 @@ export const Dialogs: React.FC = () => {
 						collapsed: dialog.collapsed,
 						onChangeCollapsed: (collapsed: boolean) =>
 							dispatch({type: 'setDialogCollapsed', collapsed, index}),
-						onClose: () => dispatch({type: 'removeDialog', index})
+						onClose: () => {
+							dispatch({type: 'removeDialog', index})
+							console.log("removed dialogue!!");
+						}
 					};
 
 					return (

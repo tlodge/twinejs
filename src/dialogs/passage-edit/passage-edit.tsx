@@ -38,6 +38,7 @@ import { Rule } from '../../components/rules/add-button-rules';
 import {convertToObject, convertToString} from '../../util/caravan';
 import { Action } from '../../components/onstart/add-actions';
 import { TextSelect } from '../../components/control/text-select';
+import { useDialogsContext } from '../context';
 
 
 export interface PassageEditDialogProps
@@ -48,12 +49,18 @@ export interface PassageEditDialogProps
 
 
 export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props => {
+
 	const {passageId, storyId, ...other} = props;
 	const [cmEditor, setCmEditor] = React.useState<CodeMirror.Editor>();
 	const {dispatch, stories} = useUndoableStoriesContext();
 	const {formats} = useStoryFormatsContext();
 	const passage = passageWithId(stories, storyId, passageId);
 	const story = storyWithId(stories, storyId);
+	
+	console.log("passage is....");
+	console.log(passage.text);
+	console.log("------");
+
 	const storyFormat = formatWithNameAndVersion(
 		formats,
 		story.storyFormat,
@@ -62,6 +69,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 	const {t} = useTranslation();
 
 	const handlePassageTextChange = React.useCallback(
+		
 		(text: string) => {
 			dispatch(updatePassage(story, passage, {text}));
 		},
@@ -128,6 +136,8 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 	const isStart = story.startPassage === passage.id;
 	const node = convertToObject(passage.text);
 
+	const {actions = []} = (node.onstart || {})
+	console.log("node actions", actions);
 
 	return (
 		<DialogCard
@@ -137,37 +147,18 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 		>
 			<ButtonBar>
 				<UndoRedoButtons editor={cmEditor} watch={passage.text} />
-				{/*<AddTagButton
-					assignedTags={passage.tags}
-					existingTags={storyPassageTags(story)}
-					onAdd={handleAddTag}
-				/>*/}
-				
-				
-				{/*<ChooseTypeButton type={node.type} onSelect={(e)=>{
-					const _node = {
-						...node,
-						type:e,
-					}
-					const passagetext = convertToString(_node);
-					dispatch(updatePassage(story, passage, {text: passagetext}));
-				}}/>*/}
 				<AddOnStartButton
-					lines={(convertToObject(passage.text||"").onstart || {}).speech || []}
-					actions={(convertToObject(passage.text||"").onstart || {}).actions || []}
+					actions={actions}
 					onAdd={handleAddStart}
 					onClose={()=>{console.log("closed!")}}
 					label={"on start"}
 				/>
 				<AddRulesButton
-					rules={convertToObject(passage.text).rules}
+					rules={node.rules}
 					type={node.type}
 					label="rules"
 					onAdd={(rules:Rule[])=>{
-						const passageobj = {...convertToObject(passage.text)}
-
-						
-
+						const passageobj = {...node}
 						const _updated = {
 							...passageobj,
 							rules /*: [...passageobj.rules, ...rules]*/
@@ -175,7 +166,6 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 						
 						const passagetext = convertToString(_updated);
 						dispatch(updatePassage(story, passage, {text: passagetext}));
-
 					}}
 					onSelect={(type)=>{
 						
@@ -269,6 +259,7 @@ export const PassageEditDialog: React.FC<PassageEditDialogProps> = props => {
 		passageWithId(stories, props.storyId, props.passageId);
 	} catch (err) {
 		console.log("ERROR", err);
+		console.log("I AM CLOSED NOE!!");
 		props.onClose();
 		return null;
 	}

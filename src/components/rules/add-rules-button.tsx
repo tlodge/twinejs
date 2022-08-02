@@ -29,7 +29,6 @@ export const AddRulesButton: React.FC<AddRuleButton> = props => {
 	let validationMessage: string | undefined = undefined;
 
 	const typeChange = (e: React.ChangeEvent<HTMLSelectElement>)=>{
-		console.log("seen a type change!!", e.target.value);
 		props.onSelect(e.target.value);
 	}
 	return (

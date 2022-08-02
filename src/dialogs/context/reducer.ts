@@ -12,6 +12,9 @@ export const reducer: React.Reducer<DialogsState, DialogsAction> = (
 			// to the end.
 
 			let exists = false;
+			//close all other open dialogues!!
+
+
 			const editedState = state.map(stateDialog => {
 				if (
 					isEqual(stateDialog, {
@@ -33,7 +36,8 @@ export const reducer: React.Reducer<DialogsState, DialogsAction> = (
 			}
 
 			return [
-				...state,
+				//CHANGED BY tlodge to prevent issue when wrong onstart dialogue left open
+				//...state,
 				{component: action.component, collapsed: false, props: action.props}
 			];
 
