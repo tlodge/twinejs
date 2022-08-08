@@ -76,12 +76,17 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 		[dispatch, passage, story]
 	);
 
-	const handleAddStart = React.useCallback((speech : Speech[], actions:Action[][])=>{
+	const handleAddStart = React.useCallback((actions:Action[][])=>{
+
+		console.log("---> am in handle add start with actions");
+		console.log("*******");
+		console.log(actions);
+		console.log("*******");
 		//get the current text and turn into a node object
 		const passageobj = convertToObject(passage.text);
 
 		//set the new text using a passage object modified with speech lines
-		const passagetext = convertToString({...passageobj, onstart:{...passageobj.onstart, speech, actions}});
+		const passagetext = convertToString({...passageobj, onstart:{...passageobj.onstart, actions}});
 		
 		//update the passage object
 		dispatch(updatePassage(story, passage, {text: passagetext}));
@@ -163,6 +168,7 @@ export const InnerPassageEditDialog: React.FC<PassageEditDialogProps> = props =>
 							...passageobj,
 							rules /*: [...passageobj.rules, ...rules]*/
 						}
+						
 						
 						const passagetext = convertToString(_updated);
 						dispatch(updatePassage(story, passage, {text: passagetext}));

@@ -97,6 +97,7 @@ export const AddAction: React.FC<AddActionProps> = props => {
     }
 
     const setParams = (params:string="")=>{
+        
         _setAction({ 
             ..._action,
             params 
@@ -118,6 +119,14 @@ export const AddAction: React.FC<AddActionProps> = props => {
     }
 
     const _format = (action:Action)=>{
+
+        console.log("RETURNING FORMATTED ACTION");
+        console.log({
+            ...action,
+            delay: isNaN(Number(action.delay)) ? 0 : Number(action.delay),
+            method: action.method ? action.method : Method.GET,
+            params: action.params || "",
+        });
         return {
             ...action,
             delay: isNaN(Number(action.delay)) ? 0 : Number(action.delay),
@@ -223,7 +232,6 @@ export const AddAction: React.FC<AddActionProps> = props => {
         const {media=""} = query;
 
         const _setMedia = (e:React.ChangeEvent<HTMLSelectElement>)=>{
-            console.log("setting media", e.target.value);
            setParams(JSON.stringify({query:{media:e.target.value}}));
         }
 
@@ -277,7 +285,6 @@ export const AddAction: React.FC<AddActionProps> = props => {
         const {body={}} = params;
         const {speech=[]} = body;
         return <AddSpeech lines={speech} onAdd={(lines)=>{
-            console.log("speech added, so setting method to post!!");
             setMethod(Method.POST);
             setParams(JSON.stringify({body:{speech:lines}}))
         }}/>

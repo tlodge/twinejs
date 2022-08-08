@@ -14,7 +14,7 @@ import { Actions } from '../rules/actions';
 export interface AddOnStartButtonProps {
 	icon?: React.ReactNode;
 	label?: string;
-	onAdd: (lines:Speech[], actions:Action[][]) => void;
+	onAdd: (actions:Action[][]) => void;
     onClose : ()=>void
     //lines: Speech[]
     actions: Action[][]
@@ -33,11 +33,13 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
 
 
     React.useEffect(()=>{
+        console.log("ok set actions to", props.actions);
         setActions(props.actions);
     },[props.actions]);
 
 	function handleAdd() {
 		setOpen(false);
+        onAdd(actions);
 	}
 
     const deleteAction = (aindex:number,subindex:number)=>{
