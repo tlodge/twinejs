@@ -32,7 +32,8 @@ export interface Rule {
 const actions = [
     {name: "raw", id:"raw", url:"", params:"{}", method:Method.GET, description:"Call this custom url"},
     {name: "arm expand", id:"arm-expand", url:"http://[lenovo]:9107/api/arm/expand", params:"{}", method:Method.GET, description:"This will move the camera arm into the extended state"},
-    {name: "arm collapse", id:"arm-collapse", url:"http://[lenovo]:9107/api/collapse", params:"{}", method:Method.GET, description:"This will move the camera arm into the rest state"},
+    {name: "arm collapse", id:"arm-collapse", url:"http://[lenovo]:9107/api/arm/collapse", params:"{}", method:Method.GET, description:"This will move the camera arm into the rest state"},
+    {name: "arm scan", id:"arm-scan", url:"http://[lenovo]:9107/api/arm/scan", params:"{}", method:Method.GET, description:"This will move the camera arm left and right (once expanded!!)"},
     {name: "fan", id: "fan", url:"http://[lenovo]:9097/ui/api/fan", params:`{"query":{"rotate": true,"power":10,"cool":true,"from":0,"to":90}}`, method:Method.GET, description:"This will control the dyson fan (temperature, air speed, rotation)"},
     {name: "smell right on", id: "smell-right-on", url:"http://[smell-right]/on3", method:Method.GET, params:"{}", description:"This will start the right hand side smell actuator"},
     {name: "smell right off", id: "smell-right-off", url:"http://[smell-right]/off", method:Method.GET, params:"{}", description:"This will turn off the right hand side smell actuator"},
@@ -49,6 +50,7 @@ const actions = [
     {name: "screen - media", id: "screen-media", method:Method.GET, url:"http://[lenovo]:9102/api/media", params:"{}", description:"This will make the caravan screen go black, ready to play a media file.  Follow this action with a 'screen - play' action"},
     {name: "screen - play", id: "screen-media-play", method:Method.GET, url:"http://[lenovo]:9102/api/media/play",  params:`{"query":{"media":"","delay":0}}`, description:"This will play a media (mp4) file, which must be in the media directory on the lenovo.  Make sure you have called 'screen - media' first "},
     {name: "screen - camera", id: "screen-camera", method:Method.GET, url:"http://[lenovo]:9102/api/camera", params:"{}", description:"This will show live video from the camera on the caravan screen"},
+    {name: "screen - snippet", id: "screen-snippet", method:Method.GET, url:"http://[lenovo]:9102/api/web", params:`{"query":{"snippet":"edgeofreality"}}`, description:"This will show a snippet of html on the screen (saved in screen_driver/server/public/snippets)"},
     /*{name: "screen - scan", id: "screen-scan", method:Method.GET, url:"http://[lenovo]:9102/api/camera/scan", params:"{}", description:"This will place face meshes over all faces in the streamed video (make sure you have called the 'screen-camera' action first"},*/
     {name: "screen - message", id: "message", method:Method.GET, url:"http://[lenovo]:9102/api/message", params:`{"query":{"message":"a message"}}`, description:"This will flash up a message on the screen, it will overlay it on whatever is currently on there"},
     {name: "screen - qrcode", id: "qrcode", method:Method.GET, url:"http://[lenovo]:9102/api/qrcode", params:`{"query":{"qrcode":"http://[lenovo]:3001/wa/"}}`, description:"This will put a qrcode up on the screen to, for example, get a user to use a webapp served by the caravan.  Webapps could call bespoke webhook event to make something happen in the caravan"},
@@ -278,6 +280,15 @@ export const AddAction: React.FC<AddActionProps> = props => {
         return <TextInput onChange={e => setParams(JSON.stringify({query:{qrcode:e.target.value}}))} helptext={`the url to embed with the qrcode`} value={qrcode}>url</TextInput>
     }
 
+    const _snippetparams = ()=>{
+       
+        const params = JSON.parse(_action.params || "{}");
+        const {query={}} = params;
+        const {snippet="edgeofreality"} = query;
+        return <TextInput onChange={e => setParams(JSON.stringify({query:{snippet:e.target.value}}))} helptext={`the html snippet (saved in screen_driver/server/public/snippets) to display`} value={snippet}>snippet</TextInput>
+        
+    }
+
     const _speechparams = ()=>{
         
         //FIX!!
@@ -347,6 +358,8 @@ export const AddAction: React.FC<AddActionProps> = props => {
         switch (selectedActionProfile){
             case "screen-media-play":
                 return _mediaparams();
+            case "screen-snippet":
+                return _snippetparams();
             case "nanoleaf":
                 return _nanoparams();
             case "huecolour":
