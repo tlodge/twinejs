@@ -266,12 +266,11 @@ export const AddAction: React.FC<AddActionProps> = props => {
 
     const _imageparams = ()=>{
         const params = JSON.parse(_action.params || "{}");
-        const {body={}} = params;
-        const {image="name of image"} = body;
-        return <TextInput onChange={e => setParams(JSON.stringify({body:{image:e.target.value}}))} helptext={`the image you want to display`} value={image}>image</TextInput>
+        const {query={}} = params;
+        const {image="name of image"} = query;
+        return <TextInput onChange={e => setParams(JSON.stringify({query:{image:e.target.value}}))} helptext={`the image you want to display`} value={image}>image</TextInput>
     }
 
-    //{"body":{"text":"a line of text"}}
     const _printerparams = ()=>{
         const params = JSON.parse(_action.params || "{}");
         const {body={}} = params;
