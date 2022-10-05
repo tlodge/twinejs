@@ -41,20 +41,20 @@ const actions = [
     {name: "smell left off", id: "smell-left-off", url:"http://[smell-left]/off", method:Method.GET, params:"{}", description:"This will turn off the left hand side smell actuator"},
     {name: "nanoleaf", id:"nanoleaf", url:"http://[lenovo]:9104/ui/api/hex", method:Method.GET,params:`{"query":{"hue":203,"sat":91,"brightness":99}}`, description:"This will set the colours of the nanoleaf lights (under the caravan seat)"},
     {name: "hue", id: "huecolour", method:Method.GET,url:"http://[lenovo]:9092/ui/api/hex",  params:`{"query":{"hex":"ff0000"}}`, description:"This will change the hue lights colour"},
-    /*{name: "huescript", id: "huescript", method:Method.GET,url:"http://[lenovo]:9092/ui/api/light_script",  params:`{"query":{"script_id":"alightscript"}}`, description:"This will run a pre-authored script that sets the hue light's colours (the strip above the screen)"},*/
     {name: "togglewindows", id: "togglewindows", method:Method.GET,url:"http://[windows]:9222/H",  params:"{}", description:"This will toggle the opacity of the caravan windows"},
     {name: "printline", id: "printline", method:Method.POST, url:"http://[receipt]:8080/print", params:`{"body":{"text":"a line of text"}}`, description:"This will print a line of text on the label printer"},
-    {name: "speech", id: "speech", method:Method.POST, url:"http://[speech]:9105/api/speech", params:`{"body":{"speech":[{"words":"a line of speech"}]}}`, description:"This will send text to the speech synthesizer, or if you render, it will play speech generated Mozilla's speech synthesizer"},
+    {name: "speech", id: "speech", method:Method.POST, url:"http://[speech]:9105/api/speech", params:`{"body":{"speech":[{"words":"a line of speech"}]}}`, description:"This will send text to the speech synthesizer, or if you render, it will play speech generated Mozilla's speech synthesizer, words between | and | will be replaced by placholders (set in the "},
     {name: "screen - home", id: "screen-home", method:Method.GET, url:"http://[lenovo]:9102/api/home", params:"{}", description:"This set the caravan screen to the 'future mundane' title"},
     {name: "screen - dyson", id: "screen-dyson", method:Method.GET, url:"http://[lenovo]:9102/api/air", params:"{}", description:"This will show the air quality readings from the dyson fan"},
-    {name: "screen - media", id: "screen-media", method:Method.GET, url:"http://[lenovo]:9102/api/media", params:"{}", description:"This will make the caravan screen go black, ready to play a media file.  Follow this action with a 'screen - play' action"},
-    {name: "screen - play", id: "screen-media-play", method:Method.GET, url:"http://[lenovo]:9102/api/media/play",  params:`{"query":{"media":"","delay":0}}`, description:"This will play a media (mp4) file, which must be in the media directory on the lenovo.  Make sure you have called 'screen - media' first "},
+    /*{name: "screen - media", id: "screen-media", method:Method.GET, url:"http://[lenovo]:9102/api/media", params:"{}", description:"This will make the caravan screen go black, ready to play a media file.  Follow this action with a 'screen - play' action"},*/
+    {name: "screen - play", id: "screen-media-play", method:Method.GET, url:"http://[lenovo]:9102/api/media/play",  params:`{"query":{"media":"","delay":0}}`, description:"This will play a media (mp4) file, which must be in the media directory of the machine running the engine."},
     {name: "screen - camera", id: "screen-camera", method:Method.GET, url:"http://[lenovo]:9102/api/camera", params:"{}", description:"This will show live video from the camera on the caravan screen"},
     {name: "screen - snippet", id: "screen-snippet", method:Method.GET, url:"http://[lenovo]:9102/api/web", params:`{"query":{"snippet":"edgeofreality"}}`, description:"This will show a snippet of html on the screen (saved in screen_driver/server/public/snippets)"},
+    {name: "screen - image", id: "screen-image", method:Method.GET, url:"http://[lenovo]:9102/api/image", params:`{"query":{"image":"myimage.jpg"}}`, description:"This will show an image on the screen."},
     /*{name: "screen - scan", id: "screen-scan", method:Method.GET, url:"http://[lenovo]:9102/api/camera/scan", params:"{}", description:"This will place face meshes over all faces in the streamed video (make sure you have called the 'screen-camera' action first"},*/
     {name: "screen - message", id: "message", method:Method.GET, url:"http://[lenovo]:9102/api/message", params:`{"query":{"message":"a message"}}`, description:"This will flash up a message on the screen, it will overlay it on whatever is currently on there"},
     {name: "screen - qrcode", id: "qrcode", method:Method.GET, url:"http://[lenovo]:9102/api/qrcode", params:`{"query":{"qrcode":"http://[lenovo]:3001/wa/"}}`, description:"This will put a qrcode up on the screen to, for example, get a user to use a webapp served by the caravan.  Webapps could call bespoke webhook event to make something happen in the caravan"},
-    /*{name: "mini screen", id:"mini-screen", method:Method.GET, url:"http://[lenovo]:9107/api/update", params:`{"query":{"html":"<img src='https://via.placeholder.com/150'>"}}`, description:"This will send arbitrary HTML to the caravan's mini screens"},*/
+    {name: "mini screen", id:"mini-screen", method:Method.GET, url:"http://[lenovo]:9107/api/update", params:`{"query":{"html":"<img src='https://via.placeholder.com/150'>"}}`, description:"This will send arbitrary HTML to the caravan's mini screens"},
 ]
 
 const _lookupaction = (action:Action)=>{
@@ -122,13 +122,6 @@ export const AddAction: React.FC<AddActionProps> = props => {
 
     const _format = (action:Action)=>{
 
-        console.log("RETURNING FORMATTED ACTION");
-        console.log({
-            ...action,
-            delay: isNaN(Number(action.delay)) ? 0 : Number(action.delay),
-            method: action.method ? action.method : Method.GET,
-            params: action.params || "",
-        });
         return {
             ...action,
             delay: isNaN(Number(action.delay)) ? 0 : Number(action.delay),
@@ -244,7 +237,7 @@ export const AddAction: React.FC<AddActionProps> = props => {
                         </div>
                         <TextSelect onChange={_setMedia}  options={[{label:"",value:""},...mediaList.map(m=>({label:m, value:m}))]} value={media}>media in caravan</TextSelect>
                     </div>
-                    <div style={{paddingTop:15,paddingBottom:7}}>
+                    <div style={{paddingTop:15,paddingBottom:7,  borderBottom:"1px solid"}}>
                         <div style={{marginTop:7, marginBottom:15, fontWeight:700}}>
                             Or upload new media
                         </div>
@@ -261,8 +254,21 @@ export const AddAction: React.FC<AddActionProps> = props => {
                             />}
                         </div>
                     </div>
+                    <div style={{paddingTop:15,paddingBottom:7}}>
+                        <div style={{marginTop:7, marginBottom:15, fontWeight:700}}>
+                            Or add filename (and upload later)
+                        </div>
+                        <TextInput onChange={e => setParams(JSON.stringify({query:{media:e.target.value}}))} helptext={`the media you want to play`} value={media}>media file</TextInput>
+                    </div>
                    {media.trim() != "" && <div style={{textAlign:"center", borderRadius: 5, padding:10, marginTop:15, fontSize:"1em"}}><strong>play file: </strong>{`${media}`}</div>}
                 </div>
+    }
+
+    const _imageparams = ()=>{
+        const params = JSON.parse(_action.params || "{}");
+        const {body={}} = params;
+        const {image="name of image"} = body;
+        return <TextInput onChange={e => setParams(JSON.stringify({body:{image:e.target.value}}))} helptext={`the image you want to display`} value={image}>image</TextInput>
     }
 
     //{"body":{"text":"a line of text"}}
@@ -360,6 +366,8 @@ export const AddAction: React.FC<AddActionProps> = props => {
                 return _mediaparams();
             case "screen-snippet":
                 return _snippetparams();
+            case "screen-image": // send to label printer
+                return _imageparams();
             case "nanoleaf":
                 return _nanoparams();
             case "huecolour":
