@@ -24,6 +24,7 @@ export interface Action {
     delay?:Number
     params?: string
     method?: Method
+	url?:string
 }
 
 

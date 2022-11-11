@@ -104,7 +104,7 @@ export const AddOnStartButton: React.FC<AddOnStartButtonProps> = props => {
 				open={open}
 			>
             
-				<CardContent style={{width:440, padding:15}}>
+				<CardContent style={{maxHeight:500, width:440, padding:15, overflowY:"auto"}}>
                     <div className="help">Make something happen immediately when this node is triggered. You could either have a voice in the caravan say something and/or you could control the caravan' sensors</div>
                     <div style={{padding:15, background:"#cfe4fc", borderRadius:5, marginTop:15}}>
                       

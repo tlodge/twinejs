@@ -31,29 +31,43 @@ export interface Rule {
 
 const actions = [
     {name: "raw", id:"raw", url:"", params:"{}", method:Method.GET, description:"Call this custom url"},
-    {name: "arm expand", id:"arm-expand", url:"http://[lenovo]:9107/api/arm/expand", params:"{}", method:Method.GET, description:"This will move the camera arm into the extended state"},
-    {name: "arm collapse", id:"arm-collapse", url:"http://[lenovo]:9107/api/arm/collapse", params:"{}", method:Method.GET, description:"This will move the camera arm into the rest state"},
-    {name: "arm scan", id:"arm-scan", url:"http://[lenovo]:9107/api/arm/scan", params:"{}", method:Method.GET, description:"This will move the camera arm left and right (once expanded!!)"},
+    {name: "arm expand", id:"arm-expand", url:"http://[lenovo]:9107/api/arm/expand", params:"{}", method:Method.GET, description:"This will open the camera door, open the drawer and move the arm camera arm into the extended state"},
+    {name: "arm collapse", id:"arm-collapse", url:"http://[lenovo]:9107/api/arm/collapse", params:"{}", method:Method.GET, description:"This will close the drawer, move the camera arm into the rest state then close the door"},
+    {name: "arm scan", id:"arm-scan", url:"http://[lenovo]:9107/api/arm/scan", params:"{}", method:Method.GET, description:"This will move the camera arm left and right (once expanded)"},
+    {name: "arm yes", id:"arm-yes", url:"http://[lenovo]:9107/api/arm/yes", params:"{}", method:Method.GET, description:"This will nod the camera head up and down (once expanded)"},
+    {name: "arm no", id:"arm-no", url:"http://[lenovo]:9107/api/arm/no", params:"{}", method:Method.GET, description:"This will shake the camera head left and right (once expanded)"},
+    {name: "arm point",id:"arm-point", url:"http://[lenovo]:9107/api/arm/point", params:`{"query":{"subject": "lock"}}`, method:Method.GET, description:"This will point the camera at items in the caravan"},
+    {name: "arm home", id:"arm-home", url:"http://[lenovo]:9107/api/arm/home", params:"{}", method:Method.GET, description:"This will move the arm its standard expanded home position (i.e camera facing forward)"},
+    {name: "arm lights", id:"arm-lights", url:"http://[lenovo]:9107/api/arm/lights", params:`{"query":{"colour":2}}`, method:Method.GET, description:"This will change the colour of the servos"},
+    {name: "arm flash", id:"arm-flash", url:"http://[lenovo]:9107/api/arm/flash", params:`{"query":{"colours":"[2,3]", "speed":500, "repetitions":5}}`, method:Method.GET, description:"This will flash the colours of the servos"},
+
     {name: "fan", id: "fan", url:"http://[lenovo]:9097/ui/api/fan", params:`{"query":{"rotate": true,"power":10,"cool":true,"from":0,"to":90}}`, method:Method.GET, description:"This will control the dyson fan (temperature, air speed, rotation)"},
+    
     {name: "smell right on", id: "smell-right-on", url:"http://[smell-right]/on3", method:Method.GET, params:"{}", description:"This will start the right hand side smell actuator"},
     {name: "smell right off", id: "smell-right-off", url:"http://[smell-right]/off", method:Method.GET, params:"{}", description:"This will turn off the right hand side smell actuator"},
     {name: "smell left on", id: "smell-left-on", url:"http://[smell-left]/on3", method:Method.GET, params:"{}", description:"This will start the left hand side smell actuator"},
     {name: "smell left off", id: "smell-left-off", url:"http://[smell-left]/off", method:Method.GET, params:"{}", description:"This will turn off the left hand side smell actuator"},
+    
     {name: "nanoleaf", id:"nanoleaf", url:"http://[lenovo]:9104/ui/api/hex", method:Method.GET,params:`{"query":{"hue":203,"sat":91,"brightness":99}}`, description:"This will set the colours of the nanoleaf lights (under the caravan seat)"},
+    
     {name: "hue", id: "huecolour", method:Method.GET,url:"http://[lenovo]:9092/ui/api/hex",  params:`{"query":{"hex":"ff0000"}}`, description:"This will change the hue lights colour"},
+    
     {name: "togglewindows", id: "togglewindows", method:Method.GET,url:"http://[windows]:9222/H",  params:"{}", description:"This will toggle the opacity of the caravan windows"},
+    
     {name: "printline", id: "printline", method:Method.POST, url:"http://[receipt]:8080/print", params:`{"body":{"text":"a line of text"}}`, description:"This will print a line of text on the label printer"},
+    
     {name: "speech", id: "speech", method:Method.POST, url:"http://[speech]:9105/api/speech", params:`{"body":{"speech":[{"words":"a line of speech"}]}}`, description:"This will send text to the speech synthesizer, or if you render, it will play speech generated Mozilla's speech synthesizer, words between | and | will be replaced by placholders (set in the "},
+    
     {name: "screen - home", id: "screen-home", method:Method.GET, url:"http://[lenovo]:9102/api/home", params:"{}", description:"This set the caravan screen to the 'future mundane' title"},
     {name: "screen - dyson", id: "screen-dyson", method:Method.GET, url:"http://[lenovo]:9102/api/air", params:"{}", description:"This will show the air quality readings from the dyson fan"},
-    /*{name: "screen - media", id: "screen-media", method:Method.GET, url:"http://[lenovo]:9102/api/media", params:"{}", description:"This will make the caravan screen go black, ready to play a media file.  Follow this action with a 'screen - play' action"},*/
     {name: "screen - play", id: "screen-media-play", method:Method.GET, url:"http://[lenovo]:9102/api/media/play",  params:`{"query":{"media":"","delay":0}}`, description:"This will play a media (mp4) file, which must be in the media directory of the machine running the engine."},
     {name: "screen - camera", id: "screen-camera", method:Method.GET, url:"http://[lenovo]:9102/api/camera", params:"{}", description:"This will show live video from the camera on the caravan screen"},
+    {name: "screen - scan", id: "screen-scan", method:Method.GET, url:"http://[lenovo]:9102/api/camera/scan", params:"{}", description:"This will place face meshes over all faces in the streamed video"},
     {name: "screen - snippet", id: "screen-snippet", method:Method.GET, url:"http://[lenovo]:9102/api/web", params:`{"query":{"snippet":"edgeofreality"}}`, description:"This will show a snippet of html on the screen (saved in screen_driver/server/public/snippets)"},
     {name: "screen - image", id: "screen-image", method:Method.GET, url:"http://[lenovo]:9102/api/image", params:`{"query":{"image":"myimage.jpg"}}`, description:"This will show an image on the screen."},
-    /*{name: "screen - scan", id: "screen-scan", method:Method.GET, url:"http://[lenovo]:9102/api/camera/scan", params:"{}", description:"This will place face meshes over all faces in the streamed video (make sure you have called the 'screen-camera' action first"},*/
-    {name: "screen - message", id: "message", method:Method.GET, url:"http://[lenovo]:9102/api/message", params:`{"query":{"message":"a message"}}`, description:"This will flash up a message on the screen, it will overlay it on whatever is currently on there"},
-    {name: "screen - qrcode", id: "qrcode", method:Method.GET, url:"http://[lenovo]:9102/api/qrcode", params:`{"query":{"qrcode":"http://[lenovo]:3001/wa/"}}`, description:"This will put a qrcode up on the screen to, for example, get a user to use a webapp served by the caravan.  Webapps could call bespoke webhook event to make something happen in the caravan"},
+     {name: "screen - message", id: "screen-message", method:Method.GET, url:"http://[lenovo]:9102/api/message", params:`{"query":{"message":"a message"}}`, description:"This will flash up a message on the screen, it will overlay it on whatever is currently on there"},
+    {name: "screen - qrcode", id: "screen-qrcode", method:Method.GET, url:"http://[lenovo]:9102/api/qrcode", params:`{"query":{"qrcode":"http://[lenovo]:3001/wa/"}}`, description:"This will put a qrcode up on the screen to, for example, get a user to use a webapp served by the caravan.  Webapps could call bespoke webhook event to make something happen in the caravan"},
+   
     {name: "mini screen", id:"mini-screen", method:Method.GET, url:"http://[lenovo]:9107/api/update", params:`{"query":{"html":"<img src='https://via.placeholder.com/150'>"}}`, description:"This will send arbitrary HTML to the caravan's mini screens"},
 ]
 
@@ -117,6 +131,13 @@ export const AddAction: React.FC<AddActionProps> = props => {
         _setAction({ 
            ..._action,
            delay: isNaN(Number(delay)) ? 0 : Number(delay)
+        })
+    }
+
+    const setURL = (url:string="")=>{
+        _setAction({ 
+           ..._action,
+          url
         })
     }
 
@@ -188,7 +209,11 @@ export const AddAction: React.FC<AddActionProps> = props => {
         const params = JSON.parse(_action.params || "{}");
         const {query={}} = params;
         const {message="a message"} = query;
-        return <TextInput onChange={e => setParams(JSON.stringify({query:{message:e.target.value}}))} helptext={`the message you want to display`} value={message}>message</TextInput>
+        return <div>
+            {renderSelectScreen("message")}
+            <TextInput onChange={e => setParams(JSON.stringify({query:{message:e.target.value}}))} helptext={`the message you want to display`} value={message}>message</TextInput>
+        </div>
+                
     }
 
     const onFileChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
@@ -220,6 +245,58 @@ export const AddAction: React.FC<AddActionProps> = props => {
         
     }
 
+    const _armpointparams = ()=>{
+        const params = JSON.parse(_action.params || "{}");
+        const {query={}} = params;
+        const {subject=""} = query;
+
+        const options = [
+            {label:"dyson", value:"dyson"},
+            {label:"windows", value:"windows"},
+            {label:"door", value:"door"},
+            {label:"screen", value:"screen"},
+            {label:"forward", value:"forward"},
+            {label:"down", value:"down"},
+            {label:"mad", value:"mad"},
+            {label:"home", value:"home"}
+        ]
+        
+        const _setSubject = (e:React.ChangeEvent<HTMLSelectElement>)=>{
+            setParams(JSON.stringify({query:{subject:e.target.value}}));
+        }
+        return <TextSelect onChange={_setSubject}  options={options} value={subject}>place to point to</TextSelect>
+    }
+
+    const _extracthost = (action:string)=>{
+        const toks = action.split(":");
+        if (toks.length > 1){
+            const host1 = toks[1].split("[");
+            if (host1.length > 1){
+                return host1[1].replace("[","").replace("]","");
+            }
+        }
+        return "";
+    }
+
+    const renderSelectScreen = (api:string="")=>{
+        const host = _extracthost(`${_action.action}`);
+        console.log("ok host is", host);
+
+        const options = [
+            {label:"main", value:"lenovo"},
+            {label:"left", value:"miniscreen-left"},
+            {label:"right", value:"miniscreen-right"}
+        ]
+
+        const _setURL = (e:React.ChangeEvent<HTMLSelectElement>)=>{
+            setAction(`http://[${e.target.value}]:9102/api/${api}`);
+        }
+        
+        return <div style={{paddingBottom:7}}>
+                    <TextSelect onChange={_setURL}  options={options} value={host}>which screen</TextSelect>
+                </div>
+    }
+
     const _mediaparams = ()=>{
 
         const params = JSON.parse(_action.params || "{}");
@@ -231,6 +308,7 @@ export const AddAction: React.FC<AddActionProps> = props => {
         }
 
         return  <div style={{paddingBottom:7}}>
+                    {renderSelectScreen("media/play")}
                     <div style={{paddingTop:7,paddingBottom:15,  borderBottom:"1px solid"}}>
                         <div style={{marginTop:7,marginBottom:15, fontWeight:700}}>
                                 Select from media on caravan server
@@ -261,6 +339,8 @@ export const AddAction: React.FC<AddActionProps> = props => {
                         <TextInput onChange={e => setParams(JSON.stringify({query:{media:e.target.value}}))} helptext={`the media you want to play`} value={media}>media file</TextInput>
                     </div>
                    {media.trim() != "" && <div style={{textAlign:"center", borderRadius: 5, padding:10, marginTop:15, fontSize:"1em"}}><strong>play file: </strong>{`${media}`}</div>}
+
+                  
                 </div>
     }
 
@@ -268,7 +348,10 @@ export const AddAction: React.FC<AddActionProps> = props => {
         const params = JSON.parse(_action.params || "{}");
         const {query={}} = params;
         const {image="name of image"} = query;
-        return <TextInput onChange={e => setParams(JSON.stringify({query:{image:e.target.value}}))} helptext={`the image you want to display`} value={image}>image</TextInput>
+        return <div>
+                {renderSelectScreen("image")}
+                <TextInput onChange={e => setParams(JSON.stringify({query:{image:e.target.value}}))} helptext={`the image you want to display`} value={image}>image</TextInput>
+        </div>
     }
 
     const _printerparams = ()=>{
@@ -278,11 +361,41 @@ export const AddAction: React.FC<AddActionProps> = props => {
         return <TextInput onChange={e => setParams(JSON.stringify({body:{text:e.target.value}}))} helptext={`the message you want to display`} value={text}>line to print</TextInput>
     }
 
+    const _armlightsparams =()=>{
+        const params = JSON.parse(_action.params || "{}");
+        const {query={}} = params;
+        const {colour="1"} = query;
+        return <TextInput onChange={e => setParams(JSON.stringify({query:{colour:e.target.value}}))} helptext={`colour (0-7)`} value={colour}>colour</TextInput>
+
+    }
+
+    const _armflashparams = ()=>{
+        const params = JSON.parse(_action.params || "{}");
+        const {query={}} = params;
+        const {colours=[], speed=1000, repetitions=5} = query;
+
+        return  <div style={{paddingBottom:7}}>
+                    <div style={{paddingTop:7,paddingBottom:15}}>
+                        <TextInput onChange={e => setParams(JSON.stringify({query:{...query, colours:e.target.value}}))} helptext={`colours you want to flash between`} value={colours}>colours</TextInput>
+                    </div>
+                    <div style={{paddingTop:7,paddingBottom:15}}>
+                        <TextInput onChange={e => setParams(JSON.stringify({query:{...query, speed:e.target.value}}))} helptext={`flash rate (ms)`} value={speed}>speed</TextInput>
+                    </div>
+                    <div style={{paddingTop:7,paddingBottom:15,  borderBottom:"1px solid"}}>
+                        <TextInput onChange={e => setParams(JSON.stringify({query:{...query, repetitions:e.target.value}}))} helptext={`number of flash repetitions`} value={repetitions}>repetitions</TextInput>
+                    </div>
+                </div>
+    };
+
     const _qrcodeparams = ()=>{
         const params = JSON.parse(_action.params || "{}");
         const {query={}} = params;
         const {qrcode="http://[lenovo]:3001/wa/"} = query;
-        return <TextInput onChange={e => setParams(JSON.stringify({query:{qrcode:e.target.value}}))} helptext={`the url to embed with the qrcode`} value={qrcode}>url</TextInput>
+        return <div>
+            {renderSelectScreen("qrcode")}
+            <TextInput onChange={e => setParams(JSON.stringify({query:{qrcode:e.target.value}}))} helptext={`the url to embed with the qrcode`} value={qrcode}>url</TextInput>
+        </div>
+        
     }
 
     const _snippetparams = ()=>{
@@ -290,8 +403,10 @@ export const AddAction: React.FC<AddActionProps> = props => {
         const params = JSON.parse(_action.params || "{}");
         const {query={}} = params;
         const {snippet="edgeofreality"} = query;
-        return <TextInput onChange={e => setParams(JSON.stringify({query:{snippet:e.target.value}}))} helptext={`the html snippet (saved in screen_driver/server/public/snippets) to display`} value={snippet}>snippet</TextInput>
-        
+        return <div>
+                    {renderSelectScreen("web")}
+                    <TextInput onChange={e => setParams(JSON.stringify({query:{snippet:e.target.value}}))} helptext={`the html snippet (saved in screen_driver/server/public/snippets) to display`} value={snippet}>snippet</TextInput>
+                </div>
     }
 
     const _speechparams = ()=>{
@@ -359,30 +474,42 @@ export const AddAction: React.FC<AddActionProps> = props => {
     }
 
     const renderParams = ()=>{
-       
+    
         switch (selectedActionProfile){
+          
+            case "screen-message": // message on screen!
+                return _messageparams();
+            case "screen-home":
+                return renderSelectScreen("home");
+            case "screen-dyson":
+                return renderSelectScreen("air");
             case "screen-media-play":
                 return _mediaparams();
             case "screen-snippet":
                 return _snippetparams();
-            case "screen-image": // send to label printer
+            case "screen-image": 
                 return _imageparams();
+            case "screen-qrcode":
+                return _qrcodeparams();   
             case "nanoleaf":
                 return _nanoparams();
             case "huecolour":
                 return _hueparams();
+            case "arm-lights":
+                return _armlightsparams();
+            case "arm-flash":
+                return _armflashparams();
+            case "arm-point":
+                return _armpointparams();
             case "raw":
                 return _rawparams();
-            case "message": // message on screen!
-                return _messageparams();
             case "printline": // send to label printer
                 return _printerparams();
             case "fan":
                 return _fanparams();
             case "speech":    
                 return _speechparams();
-            case "qrcode":
-                return _qrcodeparams();    
+            
             default:
                 return;
 
